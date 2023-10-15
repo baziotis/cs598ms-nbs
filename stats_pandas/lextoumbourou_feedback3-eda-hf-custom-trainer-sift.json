@@ -1,0 +1,56 @@
+{
+  "cells": [
+    {
+      "raw": "import numpy as np\nimport os\nimport pandas as pd\n",
+      "total-ns": 2288133775
+    },
+    {
+      "raw": "train_df = pd.read_csv('../input/feedback-prize-english-language-learning/train.csv')\ntest_df = pd.read_csv('../input/feedback-prize-english-language-learning/test.csv')",
+      "total-ns": 91906672
+    },
+    {
+      "raw": "factor = 500\nif \"IREWR_LESS_REPLICATION\" in os.environ and os.environ[\"IREWR_LESS_REPLICATION\"] == \"True\":\n    factor = factor//5\ntrain_df = pd.concat([train_df]*factor)\ntest_df = pd.concat([test_df]*factor)\ntrain_df.info()",
+      "total-ns": 119521715
+    },
+    {
+      "raw": "train_df.head()",
+      "total-ns": 611598
+    },
+    {
+      "raw": "test_df.head()",
+      "total-ns": 403297
+    },
+    {
+      "raw": "len(train_df), len(test_df)",
+      "total-ns": 334293
+    },
+    {
+      "raw": "LABEL_COLUMNS = ['cohesion', 'syntax', 'vocabulary', 'phraseology', 'grammar', 'conventions']",
+      "total-ns": 335273
+    },
+    {
+      "raw": "## ORIGINAL:\n# texts = train_df.sample(frac=1, random_state=420).head(4)\n## TO RUN WITH KOALAS\ntexts = train_df.sample(frac=1.0, random_state=420).head(4)",
+      "total-ns": 332825296
+    },
+    {
+      "raw": "train_df['total_score'] = train_df[LABEL_COLUMNS].sum(axis=1)\nlowest_df = train_df.sort_values('total_score').head(4)",
+      "total-ns": 487654141
+    },
+    {
+      "raw": "train_df['total_score'] = train_df[LABEL_COLUMNS].sum(axis=1)\nhighest_df = train_df.sort_values('total_score', ascending=False).head(4)",
+      "total-ns": 954129929
+    },
+    {
+      "raw": "train_df['word_count'] = train_df.full_text.apply(lambda x: len(x.split()))",
+      "total-ns": 37767699531
+    },
+    {
+      "raw": "train_df['word_count'].mean()",
+      "total-ns": 2408738
+    },
+    {
+      "raw": "train_df['word_count'].max()",
+      "total-ns": 2134297
+    }
+  ]
+}

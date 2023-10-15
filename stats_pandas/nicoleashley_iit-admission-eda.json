@@ -1,0 +1,64 @@
+{
+  "cells": [
+    {
+      "raw": "import pandas as pd \nimport numpy as np\n",
+      "total-ns": 2305284753
+    },
+    {
+      "raw": "df = pd.read_csv(\"../input/student_data.csv\")",
+      "total-ns": 531745600
+    },
+    {
+      "raw": "df.head()",
+      "total-ns": 1011607
+    },
+    {
+      "raw": "df.columns =['student_id','student_name', 'DOB', 'field_of_study', 'year_of_admission', 'expected_graduation', 'current_sem', 'specialization', 'fees', 'discount']\ndf.describe()",
+      "total-ns": 72226066
+    },
+    {
+      "raw": "#Check for missing values \ndf.isna().any()",
+      "total-ns": 154515159
+    },
+    {
+      "raw": "#Check for duplicated rows\ndf.duplicated().value_counts()",
+      "total-ns": 198101304
+    },
+    {
+      "raw": "df.info()",
+      "total-ns": 168402636
+    },
+    {
+      "raw": "cross_tab = pd.crosstab(df['field_of_study'], df['specialization'])\ncross_tab",
+      "total-ns": 74141956
+    },
+    {
+      "raw": "#Distribution of students across different 'field_of_study'\ncounts = df['field_of_study'].value_counts()\n",
+      "total-ns": 17112714
+    },
+    {
+      "raw": "#Students enrolled in each specialization\ndf['specialization'].value_counts()",
+      "total-ns": 19603629
+    },
+    {
+      "raw": "#Exploring any relationship between the field of study and the average age of the students\ndf['DOB'] = pd.to_datetime(df['DOB'])\ndf['age'] = (pd.to_datetime('today') - df['DOB'])\n\n#Calculate the age based on current date\ncurrent_year = pd.to_datetime('today').year\ndf['age'] = current_year - df['DOB'].dt.year\n\ndf.groupby('field_of_study')['age'].mean()",
+      "total-ns": 133096776
+    },
+    {
+      "raw": "#Students admitted each year\nadmission_counts = df['year_of_admission'].value_counts().sort_index()\nprint(admission_counts)",
+      "total-ns": 5529963
+    },
+    {
+      "raw": "#Current semester distribution among the students\nsemester_counts = df['current_sem'].value_counts().sort_index()",
+      "total-ns": 4411074
+    },
+    {
+      "raw": "#Exploring the correlation between the field of study and the fees paid\nselected_columns = df[['field_of_study','fees']]\n\n#Converting the values in 'field_of_study' to numerical values\nfield_map = {'Chemical Engineering' : 0, 'Civil Engineering' : 1, 'Computer Science' : 2, 'Electrical Engineering' :3, 'Mechanical Engineering' :4}\nselected_columns['field_of_study'] = selected_columns['field_of_study'].map(field_map)\n\ncorr_matrix = selected_columns.corr()",
+      "total-ns": 73123626
+    },
+    {
+      "raw": "#Exploring the correlation between fees and the discount on the fees\ncorrelation_matrix = df[['fees','discount']].corr()",
+      "total-ns": 10576815
+    }
+  ]
+}

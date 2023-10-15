@@ -1,0 +1,136 @@
+{
+  "cells": [
+    {
+      "raw": "#invite people for the Kaggle party\nimport os\n\nimport os\nos.environ[\"MODIN_ENGINE\"] = \"ray\"\nimport ray\nos.environ['MODIN_CPUS'] = \"4\"\nray.init(num_cpus=4, runtime_env={'env_vars': {'__MODIN_AUTOIMPORT_PANDAS__': '1'}})\nimport modin.pandas as pd\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nimport numpy as np\n# STEFANOS: Unneeded\n# from scipy.stats import norm\nfrom sklearn.preprocessing import StandardScaler\n# from scipy import stats\nimport warnings\nwarnings.filterwarnings('ignore')\n# STEFANOS: Disable magic functions\n# %matplotlib inline",
+      "total-ns": 7939018114
+    },
+    {
+      "raw": "#bring in the six packs\ndf_train = pd.read_csv('../input/train.csv')",
+      "total-ns": 5550297278
+    },
+    {
+      "raw": "factor = 300\ndf_train = pd.concat([df_train]*factor, ignore_index=True)\ndf_train.info()",
+      "total-ns": 6192475186
+    },
+    {
+      "raw": "#check the decoration\ndf_train.columns",
+      "total-ns": 488162
+    },
+    {
+      "raw": "#descriptive statistics summary\ndf_train['SalePrice'].describe()",
+      "total-ns": 25479468
+    },
+    {
+      "raw": "\n#histogram\n# STEFANOS: Disable plotting\n# sns.distplot(df_train['SalePrice']);",
+      "total-ns": 210814
+    },
+    {
+      "raw": "#skewness and kurtosis\nprint(\"Skewness: %f\" % df_train['SalePrice'].skew())\nprint(\"Kurtosis: %f\" % df_train['SalePrice'].kurt())",
+      "total-ns": 1279907413
+    },
+    {
+      "raw": "#scatter plot grlivarea/saleprice\nvar = 'GrLivArea'\ndata = pd.concat([df_train['SalePrice'], df_train[var]], axis=1)\n# STEFANOS: Disable plotting\n# data.plot.scatter(x=var, y='SalePrice', ylim=(0,800000));",
+      "total-ns": 43359653
+    },
+    {
+      "raw": "#scatter plot totalbsmtsf/saleprice\nvar = 'TotalBsmtSF'\ndata = pd.concat([df_train['SalePrice'], df_train[var]], axis=1)\n# STEFANOS: Disable plotting\n# data.plot.scatter(x=var, y='SalePrice', ylim=(0,800000));",
+      "total-ns": 22180490
+    },
+    {
+      "raw": "#box plot overallqual/saleprice\nvar = 'OverallQual'\ndata = pd.concat([df_train['SalePrice'], df_train[var]], axis=1)\n# STEFANOS: Disable plotting\n# f, ax = plt.subplots(figsize=(8, 6))\n# fig = sns.boxplot(x=var, y=\"SalePrice\", data=data)\n# fig.axis(ymin=0, ymax=800000);",
+      "total-ns": 57188698
+    },
+    {
+      "raw": "var = 'YearBuilt'\ndata = pd.concat([df_train['SalePrice'], df_train[var]], axis=1)\n# STEFANOS: Disable plotting\n# f, ax = plt.subplots(figsize=(16, 8))\n# fig = sns.boxplot(x=var, y=\"SalePrice\", data=data)\n# fig.axis(ymin=0, ymax=800000);\n# plt.xticks(rotation=90);",
+      "total-ns": 20737361
+    },
+    {
+      "raw": "#correlation matrix\ncorrmat = df_train.corr()\n# STEFANOS: Disable plotting\n# f, ax = plt.subplots(figsize=(12, 9))\n# sns.heatmap(corrmat, vmax=.8, square=True);",
+      "total-ns": 4890210346
+    },
+    {
+      "raw": "#saleprice correlation matrix\nk = 10 #number of variables for heatmap\n# STEFANOS-DISABLE-FOR-MODIN: Seems it doesn't support nlargest()\n#### ORIGINAL CODE ####\n# cols = corrmat.nlargest(k, 'SalePrice')['SalePrice'].index\n#### COMPATIBLE FOR MODIN ####\ncols = corrmat.sort_values(by='SalePrice', ascending=False).head(k)['SalePrice'].index\n\n\ncm = np.corrcoef(df_train[cols].values.T)\n# STEFANOS: Disable plotting\n# sns.set(font_scale=1.25)\n# hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f', annot_kws={'size': 10}, yticklabels=cols.values, xticklabels=cols.values)\n# plt.show()",
+      "total-ns": 9412409547
+    },
+    {
+      "raw": "#scatterplot\n# STEFANOS: Disable plotting\n# sns.set()\n# cols = ['SalePrice', 'OverallQual', 'GrLivArea', 'GarageCars', 'TotalBsmtSF', 'FullBath', 'YearBuilt']\n# sns.pairplot(df_train[cols], size = 2.5)\n# plt.show();",
+      "total-ns": 296179
+    },
+    {
+      "raw": "#missing data\ntotal = df_train.isnull().sum().sort_values(ascending=False)\npercent = (df_train.isnull().sum()/df_train.isnull().count()).sort_values(ascending=False)\nmissing_data = pd.concat([total, percent], axis=1, keys=['Total', 'Percent'])\nmissing_data.head(20)",
+      "total-ns": 8950410587
+    },
+    {
+      "raw": "#dealing with missing data\ndf_train = df_train.drop((missing_data[missing_data['Total'] > 1]).index,1)\n# STEFANOS: Disabled this line because for some it raises an exception when we replicate data.\n# I think it's better to disable one line in order to replicate data, so that we are fair to other\n# notebooks (e.g., if we don't replicate data, the cells of this notebook might be fast enough that they're all\n# discarded as very fast cells in the stats)\n# df_train = df_train.drop(df_train.loc[df_train['Electrical'].isnull()].index)\ndf_train.isnull().sum().max() #just checking that there's no missing data missing...",
+      "total-ns": 1688426114
+    },
+    {
+      "raw": "#standardizing data\nsaleprice_scaled = StandardScaler().fit_transform(df_train['SalePrice'][:,np.newaxis]);\nlow_range = saleprice_scaled[saleprice_scaled[:,0].argsort()][:10]\nhigh_range= saleprice_scaled[saleprice_scaled[:,0].argsort()][-10:]\nprint('outer range (low) of the distribution:')\nprint(low_range)\nprint('\\nouter range (high) of the distribution:')\nprint(high_range)",
+      "total-ns": 158562195
+    },
+    {
+      "raw": "#bivariate analysis saleprice/grlivarea\nvar = 'GrLivArea'\ndata = pd.concat([df_train['SalePrice'], df_train[var]], axis=1)\n# STEFANOS: Disable plotting\n# data.plot.scatter(x=var, y='SalePrice', ylim=(0,800000));",
+      "total-ns": 5872380
+    },
+    {
+      "raw": "#deleting points\ndf_train.sort_values(by = 'GrLivArea', ascending = False)[:2]\ndf_train = df_train.drop(df_train[df_train['Id'] == 1299].index)\ndf_train = df_train.drop(df_train[df_train['Id'] == 524].index)",
+      "total-ns": 4253609255
+    },
+    {
+      "raw": "#bivariate analysis saleprice/grlivarea\nvar = 'TotalBsmtSF'\ndata = pd.concat([df_train['SalePrice'], df_train[var]], axis=1)\n# STEFANOS: Disable plotting\n# data.plot.scatter(x=var, y='SalePrice', ylim=(0,800000));",
+      "total-ns": 5899249
+    },
+    {
+      "raw": "#histogram and normal probability plot\n# STEFANOS: Disable plotting\n# sns.distplot(df_train['SalePrice'], fit=norm);\n# fig = plt.figure()\n# res = stats.probplot(df_train['SalePrice'], plot=plt)",
+      "total-ns": 198911
+    },
+    {
+      "raw": "#applying log transformation\ndf_train['SalePrice'] = np.log(df_train['SalePrice'])",
+      "total-ns": 152568711
+    },
+    {
+      "raw": "#transformed histogram and normal probability plot\n# STEFANOS: Disable plotting\n# sns.distplot(df_train['SalePrice'], fit=norm);\n# fig = plt.figure()\n# res = stats.probplot(df_train['SalePrice'], plot=plt)",
+      "total-ns": 191959
+    },
+    {
+      "raw": "#histogram and normal probability plot\n# STEFANOS: Disable plotting\n# sns.distplot(df_train['GrLivArea'], fit=norm);\n# fig = plt.figure()\n# res = stats.probplot(df_train['GrLivArea'], plot=plt)",
+      "total-ns": 107653
+    },
+    {
+      "raw": "#data transformation\ndf_train['GrLivArea'] = np.log(df_train['GrLivArea'])",
+      "total-ns": 195180250
+    },
+    {
+      "raw": "#transformed histogram and normal probability plot\n# STEFANOS: Disable plotting\n# sns.distplot(df_train['GrLivArea'], fit=norm);\n# fig = plt.figure()\n# res = stats.probplot(df_train['GrLivArea'], plot=plt)",
+      "total-ns": 202551
+    },
+    {
+      "raw": "#histogram and normal probability plot\n# STEFANOS: Disable plotting\n# sns.distplot(df_train['TotalBsmtSF'], fit=norm);\n# fig = plt.figure()\n# res = stats.probplot(df_train['TotalBsmtSF'], plot=plt)",
+      "total-ns": 116016
+    },
+    {
+      "raw": "#create column for new variable (one is enough because it's a binary categorical feature)\n#if area>0 it gets 1, for area==0 it gets 0\ndf_train['HasBsmt'] = pd.Series(len(df_train['TotalBsmtSF']), index=df_train.index)\ndf_train['HasBsmt'] = 0 \ndf_train.loc[df_train['TotalBsmtSF']>0,'HasBsmt'] = 1",
+      "total-ns": 116565827
+    },
+    {
+      "raw": "#transform data\ndf_train.loc[df_train['HasBsmt']==1,'TotalBsmtSF'] = np.log(df_train['TotalBsmtSF'])",
+      "total-ns": 2013759991
+    },
+    {
+      "raw": "#histogram and normal probability plot\n# STEFANOS: Disable plotting\n# sns.distplot(df_train[df_train['TotalBsmtSF']>0]['TotalBsmtSF'], fit=norm);\n# fig = plt.figure()\n# res = stats.probplot(df_train[df_train['TotalBsmtSF']>0]['TotalBsmtSF'], plot=plt)\n_ = df_train[df_train['TotalBsmtSF']>0]['TotalBsmtSF']\n_ = df_train[df_train['TotalBsmtSF']>0]['TotalBsmtSF']",
+      "total-ns": 87819497
+    },
+    {
+      "raw": "#scatter plot\n# STEFANOS: Disable plotting\n# plt.scatter(df_train['GrLivArea'], df_train['SalePrice']);",
+      "total-ns": 261265
+    },
+    {
+      "raw": "#scatter plot\n# STEFANOS: Disable plotting\n# plt.scatter(df_train[df_train['TotalBsmtSF']>0]['TotalBsmtSF'], df_train[df_train['TotalBsmtSF']>0]['SalePrice']);\n_ = df_train[df_train['TotalBsmtSF']>0]['TotalBsmtSF']\n_ = df_train[df_train['TotalBsmtSF']>0]['SalePrice']",
+      "total-ns": 89843411
+    },
+    {
+      "raw": "#convert categorical variable into dummy\ndf_train = pd.get_dummies(df_train)",
+      "total-ns": 5751844343
+    }
+  ]
+}

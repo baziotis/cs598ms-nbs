@@ -1,0 +1,372 @@
+{
+  "cells": [
+    {
+      "raw": "import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nimport matplotlib.cm as cm\nimport seaborn as sns\nimport random\n# from wordcloud import WordCloud",
+      "total-ns": 2430930848
+    },
+    {
+      "raw": "data = pd.read_csv(\"../input/zomato_restaurants_in_India.csv\")",
+      "total-ns": 1452442213
+    },
+    {
+      "raw": "data.head(10)",
+      "total-ns": 536968
+    },
+    {
+      "raw": "data.tail()",
+      "total-ns": 243318
+    },
+    {
+      "raw": "data.city.nunique()",
+      "total-ns": 7056222
+    },
+    {
+      "raw": "data.city.unique()",
+      "total-ns": 6737697
+    },
+    {
+      "raw": "data[data[\"city\"]==\"Mumbai\"]",
+      "total-ns": 10193746
+    },
+    {
+      "raw": "",
+      "total-ns": 114511
+    },
+    {
+      "raw": "data[data[\"city\"]==\"New Delhi\"]",
+      "total-ns": 8413348
+    },
+    {
+      "raw": "data[data[\"city\"]==\"Pune\"]",
+      "total-ns": 8118248
+    },
+    {
+      "raw": "data.shape",
+      "total-ns": 372703
+    },
+    {
+      "raw": "data.info()",
+      "total-ns": 257333725
+    },
+    {
+      "raw": "data[data[\"average_cost_for_two\"]==30000]",
+      "total-ns": 964656
+    },
+    {
+      "raw": "",
+      "total-ns": 80211
+    },
+    {
+      "raw": "data.describe()",
+      "total-ns": 78999687
+    },
+    {
+      "raw": "data.head()",
+      "total-ns": 381574
+    },
+    {
+      "raw": "data.drop_duplicates([\"res_id\"],keep='first',inplace=True)\ndata.shape\n",
+      "total-ns": 18065396
+    },
+    {
+      "raw": "data.isnull().sum()",
+      "total-ns": 62516015
+    },
+    {
+      "raw": "data[\"establishment\"].unique()",
+      "total-ns": 3409289
+    },
+    {
+      "raw": "print(data[\"establishment\"].unique()[0])\nprint(type(data[\"establishment\"].unique()[0]))",
+      "total-ns": 4771239
+    },
+    {
+      "raw": "# Removing [' '] from each value\nprint(data[\"establishment\"].unique()[0])\ndata[\"establishment\"] = data[\"establishment\"].apply(lambda x:x[2:-2])\nprint(data[\"establishment\"].unique()[0])\n\n# Changing ''  to 'NA'\nprint(data[\"establishment\"].unique())\ndata[\"establishment\"] = data[\"establishment\"].apply(lambda x : np.where(x==\"\", \"NA\", x))\nprint(data[\"establishment\"].unique())",
+      "total-ns": 178048658
+    },
+    {
+      "raw": "x=10\ny=11",
+      "total-ns": 372917
+    },
+    {
+      "raw": "x==y",
+      "total-ns": 275374
+    },
+    {
+      "raw": "len(data[data[\"city\"]==\"Shimla\"])",
+      "total-ns": 19962987
+    },
+    {
+      "raw": "len(data[data[\"city\"]==\"Agra\"])",
+      "total-ns": 4567763
+    },
+    {
+      "raw": "len(data[\"city\"].unique())",
+      "total-ns": 3020509
+    },
+    {
+      "raw": "data[\"city\"].unique()",
+      "total-ns": 3595457
+    },
+    {
+      "raw": "data[data[\"city\"]==\"Jabalpur\"]",
+      "total-ns": 4217829
+    },
+    {
+      "raw": "data[\"locality\"].nunique()",
+      "total-ns": 4340794
+    },
+    {
+      "raw": "data[\"country_id\"].unique()",
+      "total-ns": 849296
+    },
+    {
+      "raw": "data[\"locality_verbose\"].nunique()",
+      "total-ns": 4325150
+    },
+    {
+      "raw": "print(data[\"cuisines\"].nunique())\nprint(data[\"cuisines\"].unique())",
+      "total-ns": 9927702
+    },
+    {
+      "raw": "data[\"cuisines\"] = data[\"cuisines\"].fillna(\"No cuisine\")",
+      "total-ns": 12705976
+    },
+    {
+      "raw": "cuisines = []\ndata[\"cuisines\"].apply(lambda x : cuisines.extend(x.split(\", \")))\ncuisines = pd.Series(cuisines)\nprint(\"Total number of unique cuisines = \", cuisines.nunique())",
+      "total-ns": 43579077
+    },
+    {
+      "raw": "print(data[\"timings\"].nunique())\nprint(data[\"timings\"].unique())",
+      "total-ns": 10751028
+    },
+    {
+      "raw": "data[\"average_cost_for_two\"].nunique()",
+      "total-ns": 1369516
+    },
+    {
+      "raw": "data[\"price_range\"].unique()",
+      "total-ns": 877407
+    },
+    {
+      "raw": "data[\"currency\"].unique()",
+      "total-ns": 2395326
+    },
+    {
+      "raw": "print(data[\"highlights\"].nunique())\nprint(data[\"highlights\"].unique())",
+      "total-ns": 54690249
+    },
+    {
+      "raw": "hl = []\ndata[\"highlights\"].apply(lambda x : hl.extend(x[2:-2].split(\"', '\")))\nhl = pd.Series(hl)\nprint(\"Total number of unique highlights = \", hl.nunique())",
+      "total-ns": 133826168
+    },
+    {
+      "raw": "data[[\"aggregate_rating\",\"votes\",\"photo_count\"]].describe().loc[[\"mean\",\"min\",\"max\"]]",
+      "total-ns": 30096535
+    },
+    {
+      "raw": "data[\"opentable_support\"].unique()",
+      "total-ns": 905709
+    },
+    {
+      "raw": "data[\"delivery\"].unique()",
+      "total-ns": 799101
+    },
+    {
+      "raw": "data[\"takeaway\"].unique()",
+      "total-ns": 1040899
+    },
+    {
+      "raw": "outlets = data[\"name\"].value_counts()",
+      "total-ns": 21351517
+    },
+    {
+      "raw": "outlets",
+      "total-ns": 386457
+    },
+    {
+      "raw": "chains = outlets[outlets >= 2]\nsingle = outlets[outlets == 1]",
+      "total-ns": 1690184
+    },
+    {
+      "raw": "data.shape",
+      "total-ns": 379281
+    },
+    {
+      "raw": "chains",
+      "total-ns": 235660
+    },
+    {
+      "raw": "print(\"Total Restaurants = \", data.shape[0])\nprint(\"Total Restaurants that are part of some chain = \", data.shape[0] - single.shape[0])\nprint(\"Percentage of Restaurants that are part of a chain = \", np.round((data.shape[0] - single.shape[0]) / data.shape[0],2)*100, \"%\")",
+      "total-ns": 999042
+    },
+    {
+      "raw": "chains.head(10)",
+      "total-ns": 516517
+    },
+    {
+      "raw": "top10_chains = data[\"name\"].value_counts()[:10].sort_values(ascending=True)",
+      "total-ns": 16638565
+    },
+    {
+      "raw": "height = top10_chains.values\nbars = top10_chains.index\ny_pos = np.arange(len(bars))\n\n# fig = plt.figure(figsize=[11,7], frameon=False)\n# ax = fig.gca()\n# ax.spines[\"top\"].set_visible(\"#424242\")\n# ax.spines[\"right\"].set_visible(False)\n# ax.spines[\"left\"].set_color(\"#424242\")\n# ax.spines[\"bottom\"].set_color(\"#424242\")\n\n# #colors = [\"green\",\"blue\",\"magenta\",\"cyan\",\"gray\",\"yellow\",\"purple\",\"violet\",\"orange\",\"red\",\"maroon\"]\n# #random.shuffle(colors)\n# colors = [\"#f9cdac\",\"#f2a49f\",\"#ec7c92\",\"#e65586\",\"#bc438b\",\"#933291\",\"#692398\",\"#551c7b\",\"#41155e\",\"#2d0f41\"]\n# plt.barh(y_pos, height, color=colors)\n \n# plt.xticks(color=\"#424242\")\n\n# plt.yticks(y_pos, bars, color=\"#424242\")\n# plt.xlabel(\"Number of outlets in India\")\n\n# for i, v in enumerate(height):\n#     ax.text(v+3, i, str(v), color='#424242')\n# plt.title(\"Top 10 Restaurant chain in India (by number of outlets)\")\n\n\n# plt.show()",
+      "total-ns": 573437
+    },
+    {
+      "raw": "outlets = data[\"name\"].value_counts()",
+      "total-ns": 14449940
+    },
+    {
+      "raw": "atleast_5_outlets = outlets[outlets > 4]",
+      "total-ns": 701047
+    },
+    {
+      "raw": "top10_chains2 = data[data[\"name\"].isin(atleast_5_outlets.index)].groupby(\"name\").mean()[\"aggregate_rating\"].sort_values(ascending=False)[:10].sort_values(ascending=True)",
+      "total-ns": 11506361
+    },
+    {
+      "raw": "height = pd.Series(top10_chains2.values).map(lambda x : np.round(x, 2))\nbars = top10_chains2.index\ny_pos = np.arange(len(bars))\n\n# fig = plt.figure(figsize=[11,7], frameon=False)\n# ax = fig.gca()\n# ax.spines[\"top\"].set_visible(\"#424242\")\n# ax.spines[\"right\"].set_visible(False)\n# ax.spines[\"left\"].set_color(\"#424242\")\n# ax.spines[\"bottom\"].set_color(\"#424242\")\n\n# #colors = [\"green\",\"blue\",\"magenta\",\"cyan\",\"gray\",\"yellow\",\"purple\",\"violet\",\"orange\",\"red\",\"maroon\"]\n# #random.shuffle(colors)\n# colors = ['#fded86', '#fce36b', '#f7c65d', '#f1a84f', '#ec8c41', '#e76f34', '#e25328', '#b04829', '#7e3e2b', '#4c3430']\n# plt.barh(y_pos, height, color=colors)\n\n# plt.xlim(3)\n# plt.xticks(color=\"#424242\")\n# plt.yticks(y_pos, bars, color=\"#424242\")\n# plt.xlabel(\"Number of outlets in India\")\n\n# for i, v in enumerate(height):\n#     ax.text(v + 0.01, i, str(v), color='#424242')\n# plt.title(\"Top 10 Restaurant chain in India (by average Rating)\")\n\n\n# plt.show()",
+      "total-ns": 900256
+    },
+    {
+      "raw": "est_count = data.groupby(\"establishment\").count()[\"res_id\"].sort_values(ascending=False)[:5]\n\n# fig = plt.figure(figsize=[8,5], frameon=False)\n# ax = fig.gca()\n# ax.spines[\"top\"].set_visible(False)\n# ax.spines[\"right\"].set_visible(False)\n# ax.spines[\"left\"].set_color(\"#424242\")\n# ax.spines[\"bottom\"].set_color(\"#424242\")\n\n# #colors = [\"green\",\"blue\",\"magenta\",\"cyan\",\"gray\",\"yellow\",\"purple\",\"violet\",\"orange\",\"red\",\"maroon\"]\n# #random.shuffle(colors)\n# colors = [\"#2d0f41\",'#933291',\"#e65586\",\"#f2a49f\",\"#f9cdac\"]\n# plt.bar(est_count.index, est_count.values, color=colors)\n\n# plt.xticks(range(0, 6), color=\"#424242\")\n# plt.yticks(range(0, 25000, 5000), color=\"#424242\")\n# plt.xlabel(\"Top 5 establishment types\")\n\n# for i, v in enumerate(est_count):\n#     ax.text(i-0.2, v+500, str(v), color='#424242')\n# plt.title(\"Number of restaurants (by establishment type)\")\n\n\n# plt.show()",
+      "total-ns": 71437148
+    },
+    {
+      "raw": "rating_by_est = data.groupby(\"establishment\").mean()[\"aggregate_rating\"].sort_values(ascending=False)[:10]\nrating_by_est",
+      "total-ns": 8078734
+    },
+    {
+      "raw": "# To check the number of outlets in each of the above establishment type, uncomment to following code\n\n#est_count = data.groupby(\"establishment\").count()[\"name\"].sort_values(ascending=False)\n#rating_by_est_map = est_count.index.isin(rating_by_est.index)\n#est_count = est_count[rating_by_est_map][rating_by_est.index]\n#est_count",
+      "total-ns": 158417
+    },
+    {
+      "raw": "data.groupby(\"establishment\").mean()[\"votes\"].sort_values(ascending=False)[:10]",
+      "total-ns": 8120888
+    },
+    {
+      "raw": "data.groupby(\"establishment\").mean()[\"photo_count\"].sort_values(ascending=False)[:10]",
+      "total-ns": 8043648
+    },
+    {
+      "raw": "city_counts = data.groupby(\"city\").count()[\"res_id\"].sort_values(ascending=True)[-10:]\n\n# height = pd.Series(city_counts.values)\n# bars = city_counts.index\n# y_pos = np.arange(len(bars))\n\n# fig = plt.figure(figsize=[11,7], frameon=False)\n# ax = fig.gca()\n# ax.spines[\"top\"].set_visible(\"#424242\")\n# ax.spines[\"right\"].set_visible(False)\n# ax.spines[\"left\"].set_color(\"#424242\")\n# ax.spines[\"bottom\"].set_color(\"#424242\")\n\n# #colors = [\"green\",\"blue\",\"magenta\",\"cyan\",\"gray\",\"yellow\",\"purple\",\"violet\",\"orange\",\"red\",\"maroon\"]\n# #random.shuffle(colors)\n# colors = ['#dcecc9', '#aadacc', '#78c6d0', '#48b3d3', '#3e94c0', '#3474ac', '#2a5599', '#203686', '#18216b', '#11174b']\n# plt.barh(y_pos, height, color=colors)\n\n# plt.xlim(3)\n# plt.xticks(color=\"#424242\")\n# plt.yticks(y_pos, bars, color=\"#424242\")\n# plt.xlabel(\"Number of outlets\")\n\n# for i, v in enumerate(height):\n#     ax.text(v + 20, i, str(v), color='#424242')\n# plt.title(\"Number of restaurants (by city)\")\n\n\n# plt.show()",
+      "total-ns": 87353996
+    },
+    {
+      "raw": "rating_by_city = data.groupby(\"city\").mean()[\"aggregate_rating\"].sort_values(ascending=False)[:10]\nrating_by_city",
+      "total-ns": 11138711
+    },
+    {
+      "raw": "# To check the number of outlets in each of the above establishment type\n\n#city_count = data.groupby(\"city\").count()[\"name\"].sort_values(ascending=False)\n#rating_by_city_map = city_count.index.isin(rating_by_city.index)\n#city_count = city_count[rating_by_city_map][rating_by_city.index]\n#city_count",
+      "total-ns": 278401
+    },
+    {
+      "raw": "data.groupby(\"city\").mean()[\"votes\"].sort_values(ascending=False)[:10]",
+      "total-ns": 10274531
+    },
+    {
+      "raw": "data.groupby(\"city\").mean()[\"photo_count\"].sort_values(ascending=False)[:10]",
+      "total-ns": 10717034
+    },
+    {
+      "raw": "print(\"Total number of unique cuisines = \", cuisines.nunique())",
+      "total-ns": 7249816
+    },
+    {
+      "raw": "c_count = cuisines.value_counts()[:5]\n\n# fig = plt.figure(figsize=[8,5], frameon=False)\n# ax = fig.gca()\n# ax.spines[\"top\"].set_visible(False)\n# ax.spines[\"right\"].set_visible(False)\n# ax.spines[\"left\"].set_color(\"#424242\")\n# ax.spines[\"bottom\"].set_color(\"#424242\")\n\n# #colors = [\"green\",\"blue\",\"magenta\",\"cyan\",\"gray\",\"yellow\",\"purple\",\"violet\",\"orange\",\"red\",\"maroon\"]\n# #random.shuffle(colors)\n# colors = ['#4c3430', '#b04829', '#ec8c41', '#f7c65d','#fded86']\n# plt.bar(c_count.index, c_count.values, color=colors)\n\n# plt.xticks(range(0, 6), color=\"#424242\")\n# plt.yticks(range(0, 30000, 5000), color=\"#424242\")\n# plt.xlabel(\"Top 5 cuisines\")\n\n# for i, v in enumerate(c_count):\n#     ax.text(i-0.2, v+500, str(v), color='#424242')\n# plt.title(\"Number of restaurants (by cuisine type)\")\n\n\n# plt.show()",
+      "total-ns": 11059434
+    },
+    {
+      "raw": "data[\"cuisines2\"] = data['cuisines'].apply(lambda x : x.split(\", \"))\n\ncuisines_list = cuisines.unique().tolist()\nzeros = np.zeros(shape=(len(cuisines_list),2))\nc_and_r = pd.DataFrame(zeros, index=cuisines_list, columns=[\"Sum\",\"Total\"])",
+      "total-ns": 97327866
+    },
+    {
+      "raw": "for i, x in data.iterrows():\n    for j in x[\"cuisines2\"]:\n        c_and_r.loc[j][\"Sum\"] += x[\"aggregate_rating\"]  \n        c_and_r.loc[j][\"Total\"] += 1",
+      "total-ns": 17815374818
+    },
+    {
+      "raw": "c_and_r[\"Mean\"] = c_and_r[\"Sum\"] / c_and_r[\"Total\"]\nc_and_r",
+      "total-ns": 1040125
+    },
+    {
+      "raw": "c_and_r[[\"Mean\",\"Total\"]].sort_values(by=\"Mean\", ascending=False)[:10]",
+      "total-ns": 1508437
+    },
+    {
+      "raw": "print(\"Total number of unique cuisines = \", hl.nunique())",
+      "total-ns": 28777243
+    },
+    {
+      "raw": "h_count = hl.value_counts()[:5]\n\n# fig = plt.figure(figsize=[10,6], frameon=False)\n# ax = fig.gca()\n# ax.spines[\"top\"].set_visible(False)\n# ax.spines[\"right\"].set_visible(False)\n# ax.spines[\"left\"].set_color(\"#424242\")\n# ax.spines[\"bottom\"].set_color(\"#424242\")\n\n# #colors = [\"green\",\"blue\",\"magenta\",\"cyan\",\"gray\",\"yellow\",\"purple\",\"violet\",\"orange\",\"red\",\"maroon\"]\n# #random.shuffle(colors)\n# colors = ['#11174b', '#2a5599', '#3e94c0', '#78c6d0', '#dcecc9']\n# plt.bar(h_count.index, h_count.values, color=colors)\n\n# plt.xticks(range(0, 6), color=\"#424242\")\n# plt.yticks(range(0, 70000, 10000), color=\"#424242\")\n# plt.xlabel(\"Top 5 highlights\")\n\n# for i, v in enumerate(h_count):\n#     ax.text(i-0.2, v+500, str(v), color='#424242')\n# plt.title(\"Number of restaurants (by highlights)\")\n\n\n# plt.show()",
+      "total-ns": 42719063
+    },
+    {
+      "raw": "data[\"highlights\"][0]",
+      "total-ns": 2324945
+    },
+    {
+      "raw": "data[\"highlights2\"] = data['highlights'].apply(lambda x : x[2:-2].split(\"', '\"))\n\nhl_list = hl.unique().tolist()\nzeros = np.zeros(shape=(len(hl_list),2))\nh_and_r = pd.DataFrame(zeros, index=hl_list, columns=[\"Sum\",\"Total\"])",
+      "total-ns": 107847281
+    },
+    {
+      "raw": "for i, x in data.iterrows():\n    for j in x[\"highlights2\"]:\n        h_and_r.loc[j][\"Sum\"] += x[\"aggregate_rating\"]  \n        h_and_r.loc[j][\"Total\"] += 1",
+      "total-ns": 54975205226
+    },
+    {
+      "raw": "h_and_r[\"Mean\"] = h_and_r[\"Sum\"] / h_and_r[\"Total\"]\nh_and_r",
+      "total-ns": 886881
+    },
+    {
+      "raw": "h_and_r[[\"Mean\",\"Total\"]].sort_values(by=\"Mean\", ascending=False)[:10]",
+      "total-ns": 1251216
+    },
+    {
+      "raw": "# https://www.geeksforgeeks.org/generating-word-cloud-python/\n\n# hl_str = \"\"\n# for i in hl:\n#     hl_str += str(i) + \" \"\n# wordcloud = WordCloud(width = 800, height = 500, \n#                 background_color ='white', \n#                 min_font_size = 10, max_words=30).generate(hl_str) \n                         \n# plt.figure(figsize = (8, 8), facecolor = None) \n# plt.imshow(wordcloud) \n# plt.axis(\"off\") \n# plt.tight_layout(pad = 0) \n  \n# plt.show()",
+      "total-ns": 203877
+    },
+    {
+      "raw": "# sns.kdeplot(data['aggregate_rating'], shade=True)\n# plt.title(\"Ratings distribution\")\n# plt.show()",
+      "total-ns": 89220
+    },
+    {
+      "raw": "# sns.kdeplot(data['average_cost_for_two'], shade=True)\n# plt.title(\"Average cost for 2 distribution\")\n# plt.show()",
+      "total-ns": 78908
+    },
+    {
+      "raw": "# sns.kdeplot(data['average_cost_for_two'], shade=True)\n# plt.xlim([0, 6000])\n# plt.xticks(range(0,6000,500))\n# plt.title(\"Average cost for 2 distribution\")\n# plt.show()",
+      "total-ns": 85926
+    },
+    {
+      "raw": "pr_count = data.groupby(\"price_range\").count()[\"name\"]\n\n# fig = plt.figure(figsize=[8,5], frameon=False)\n# ax = fig.gca()\n# ax.spines[\"top\"].set_visible(False)\n# ax.spines[\"right\"].set_visible(False)\n# ax.spines[\"left\"].set_color(\"#424242\")\n# ax.spines[\"bottom\"].set_color(\"#424242\")\n\n# #colors = [\"green\",\"blue\",\"magenta\",\"cyan\",\"gray\",\"yellow\",\"purple\",\"violet\",\"orange\",\"red\",\"maroon\"]\n# #random.shuffle(colors)\n# colors = [\"#2d0f41\",'#933291',\"#f2a49f\",\"#f9cdac\"]\n# plt.bar(pr_count.index, pr_count.values, color=colors)\n\n# plt.xticks(range(0, 5), color=\"#424242\")\n# plt.yticks(range(0, 40000, 5000), color=\"#424242\")\n# plt.xlabel(\"Price Ranges\")\n\n# for i, v in enumerate(pr_count):\n#     ax.text(i+0.85, v+700, str(v), color='#424242')\n# plt.title(\"Number of restaurants (by price ranges)\")\n\n\n# plt.show()",
+      "total-ns": 88529345
+    },
+    {
+      "raw": "np.round(data[[\"average_cost_for_two\",\"aggregate_rating\"]].corr()[\"average_cost_for_two\"][1],2)",
+      "total-ns": 2451341
+    },
+    {
+      "raw": "# plt.plot(\"average_cost_for_two\",\"aggregate_rating\", data=data, linestyle=\"none\", marker=\"o\")\n# plt.xlim([0,6000])\n# plt.title(\"Relationship between Average cost and Rating\")\n# plt.xlabel(\"Average cost for two\")\n# plt.ylabel(\"Ratings\")\n# plt.show()",
+      "total-ns": 177248
+    },
+    {
+      "raw": "# plt.plot(\"average_cost_for_two\",\"aggregate_rating\", data=data.sample(1000), linestyle=\"none\", marker=\"o\")\n# plt.xlim([0,3000])\n# plt.show()",
+      "total-ns": 97645
+    },
+    {
+      "raw": "np.round(data[[\"price_range\",\"aggregate_rating\"]].corr()[\"price_range\"][1],2)",
+      "total-ns": 2491743
+    },
+    {
+      "raw": "# sns.boxplot(x='price_range', y='aggregate_rating', data=data)\n# plt.ylim(1)\n# plt.title(\"Relationship between Price range and Ratings\")\n# plt.show()",
+      "total-ns": 184022
+    },
+    {
+      "raw": "# data.to_csv(\"zomato_final.csv\")",
+      "total-ns": 131374
+    },
+    {
+      "raw": "",
+      "total-ns": 67780
+    }
+  ]
+}

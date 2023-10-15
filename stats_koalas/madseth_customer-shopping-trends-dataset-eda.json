@@ -1,0 +1,100 @@
+{
+  "cells": [
+    {
+      "raw": "# This Python 3 environment comes with many helpful analytics libraries installed\n# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n# For example, here's several helpful packages to load\n\nimport numpy as np # linear algebra\nimport pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\n\n# Input data files are available in the read-only \"../input/\" directory\n# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n\nimport os\nfor dirname, _, filenames in os.walk('/kaggle/input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))\n\n# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session",
+      "total-ns": 1206679325
+    },
+    {
+      "raw": "df = pd.read_csv(\"../input/shopping_trends_updated.csv\")\ndf.head()",
+      "total-ns": 13159680
+    },
+    {
+      "raw": "df.shape",
+      "total-ns": 367028
+    },
+    {
+      "raw": "df.columns",
+      "total-ns": 184115
+    },
+    {
+      "raw": "df.info()",
+      "total-ns": 12453251
+    },
+    {
+      "raw": "df.isnull().sum()",
+      "total-ns": 10398769
+    },
+    {
+      "raw": "df.duplicated().sum()",
+      "total-ns": 6269757
+    },
+    {
+      "raw": "df.describe()",
+      "total-ns": 12872868
+    },
+    {
+      "raw": "gender_counts = df['Gender'].value_counts()",
+      "total-ns": 1415935
+    },
+    {
+      "raw": "category_data = df['Category'].value_counts()",
+      "total-ns": 1294279
+    },
+    {
+      "raw": "df.columns",
+      "total-ns": 389046
+    },
+    {
+      "raw": "sold_items = df['Item Purchased'].value_counts().sort_values(ascending = False)\n",
+      "total-ns": 1289601
+    },
+    {
+      "raw": "var = df.groupby(['Item Purchased', 'Gender']).size().reset_index(name='Customer Count')\nsorted_var = var.sort_values(by='Item Purchased', ascending=False)",
+      "total-ns": 5614130
+    },
+    {
+      "raw": "var = df.groupby('Category')['Purchase Amount (USD)'].sum().reset_index().sort_values(by='Purchase Amount (USD)',ascending=False)",
+      "total-ns": 1927970
+    },
+    {
+      "raw": "var = df.groupby('Location')['Purchase Amount (USD)'].sum().reset_index().sort_values(by='Purchase Amount (USD)',ascending=False).head(10)",
+      "total-ns": 1893121
+    },
+    {
+      "raw": "size_count = df['Size'].value_counts()",
+      "total-ns": 843033
+    },
+    {
+      "raw": "color_count = df['Color'].value_counts().head(10)",
+      "total-ns": 1071414
+    },
+    {
+      "raw": "df.columns",
+      "total-ns": 377107
+    },
+    {
+      "raw": "season_data = df['Season'].value_counts()",
+      "total-ns": 964620
+    },
+    {
+      "raw": "subs_count = df['Subscription Status'].value_counts()",
+      "total-ns": 843291
+    },
+    {
+      "raw": "shipping_count = df['Shipping Type'].value_counts()",
+      "total-ns": 775843
+    },
+    {
+      "raw": "disc_count = df['Discount Applied'].value_counts()",
+      "total-ns": 689962
+    },
+    {
+      "raw": "df.columns",
+      "total-ns": 298205
+    },
+    {
+      "raw": "df['Promo Code Used'].value_counts()",
+      "total-ns": 878882
+    }
+  ]
+}

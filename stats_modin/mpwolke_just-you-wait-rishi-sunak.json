@@ -1,0 +1,120 @@
+{
+  "cells": [
+    {
+      "raw": "# This Python 3 environment comes with many helpful analytics libraries installed\n# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n# For example, here's several helpful packages to load\n\nimport numpy as np # linear algebra\nimport os\n\nimport os\nos.environ[\"MODIN_ENGINE\"] = \"ray\"\nimport ray\nos.environ['MODIN_CPUS'] = \"4\"\nray.init(num_cpus=4, runtime_env={'env_vars': {'__MODIN_AUTOIMPORT_PANDAS__': '1'}})\nimport modin.pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\n\n#Ignore warnings\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# Input data files are available in the read-only \"../input/\" directory\n# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n\nimport os\nfor dirname, _, filenames in os.walk('../input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))\n\n# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session",
+      "total-ns": 7375295955
+    },
+    {
+      "raw": "import re\nimport string\n\nimport nltk\nfrom nltk.probability import FreqDist\nfrom nltk.stem import WordNetLemmatizer\nfrom nltk.corpus import stopwords\nfrom nltk.stem import SnowballStemmer\nfrom nltk import pos_tag\nfrom nltk.stem import WordNetLemmatizer\nfrom nltk.tokenize import word_tokenize\n\n# STEFANOS: Unneeded\n# from wordcloud import WordCloud\nfrom tqdm.auto import tqdm\nimport matplotlib.style as style\nstyle.use('fivethirtyeight')",
+      "total-ns": 705657657
+    },
+    {
+      "raw": "train = pd.read_parquet('../input/latest-elected-uk-prime-minister-rishi-sunak/uk_pm.parquet')",
+      "total-ns": 5131683690
+    },
+    {
+      "raw": "train.head()",
+      "total-ns": 3608494
+    },
+    {
+      "raw": "df = pd.read_csv(\"../input/latest-elected-uk-prime-minister-rishi-sunak/uk_pm.csv\", delimiter=',', encoding='utf8')\npd.set_option('display.max_columns', None)\ndf.tail()",
+      "total-ns": 400486560
+    },
+    {
+      "raw": "#Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\nprint(len(train[train['likecount'] < 500]), 'tweets with less than 500 dislikes')\nprint(len(train[train['likecount'] > 500]), 'tweets with more than 500 dislikes')",
+      "total-ns": 362412179
+    },
+    {
+      "raw": "#Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\n# video with the most comments\n\ntrain[train['likecount'] == train['likecount'].max()]['text'].iloc[0]",
+      "total-ns": 101153335
+    },
+    {
+      "raw": "#Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\ndef remove_line_breaks(text):\n    text = text.replace('\\r', ' ').replace('\\n', ' ')\n    return text\n\n#remove punctuation\ndef remove_punctuation(text):\n    re_replacements = re.compile(\"__[A-Z]+__\")  # such as __NAME__, __LINK__\n    re_punctuation = re.compile(\"[%s]\" % re.escape(string.punctuation))\n    '''Escape all the characters in pattern except ASCII letters and numbers'''\n    tokens = word_tokenize(text)\n    tokens_zero_punctuation = []\n    for token in tokens:\n        if not re_replacements.match(token):\n            token = re_punctuation.sub(\" \", token)\n        tokens_zero_punctuation.append(token)\n    return ' '.join(tokens_zero_punctuation)\n\ndef remove_special_characters(text):\n    text = re.sub('[^a-zA-z0-9\\s]', '', text)\n    return text\n\ndef lowercase(text):\n    text_low = [token.lower() for token in word_tokenize(text)]\n    return ' '.join(text_low)\n\ndef remove_stopwords(text):\n    stop = set(stopwords.words('english'))\n    word_tokens = nltk.word_tokenize(text)\n    text = \" \".join([word for word in word_tokens if word not in stop])\n    return text\n\n#remobe one character words\ndef remove_one_character_words(text):\n    '''Remove words from dataset that contain only 1 character'''\n    text_high_use = [token for token in word_tokenize(text) if len(token)>1]      \n    return ' '.join(text_high_use)   \n    \n#%%\n# Stemming with 'Snowball stemmer\" package\ndef stem(text):\n    stemmer = nltk.stem.snowball.SnowballStemmer('english')\n    text_stemmed = [stemmer.stem(token) for token in word_tokenize(text)]        \n    return ' '.join(text_stemmed)\n\ndef lemma(text):\n    wordnet_lemmatizer = WordNetLemmatizer()\n    word_tokens = nltk.word_tokenize(text)\n    text_lemma = \" \".join([wordnet_lemmatizer.lemmatize(word) for word in word_tokens])       \n    return ' '.join(text_lemma)\n\n\n#break sentences to individual word list\ndef sentence_word(text):\n    word_tokens = nltk.word_tokenize(text)\n    return word_tokens\n#break paragraphs to sentence token \ndef paragraph_sentence(text):\n    sent_token = nltk.sent_tokenize(text)\n    return sent_token    \n\n\ndef tokenize(text):\n    \"\"\"Return a list of words in a text.\"\"\"\n    return re.findall(r'\\w+', text)\n\ndef remove_numbers(text):\n    no_nums = re.sub(r'\\d+', '', text)\n    return ''.join(no_nums)\n\n\n\ndef clean_text(text):\n    _steps = [\n    remove_line_breaks,\n    remove_one_character_words,\n    remove_special_characters,\n    lowercase,\n    remove_punctuation,\n    remove_stopwords,\n    stem,\n    remove_numbers\n]\n    for step in _steps:\n        text=step(text)\n    return text   \n#%%",
+      "total-ns": 4406294
+    },
+    {
+      "raw": "#https://stackoverflow.com/questions/55557004/getting-attributeerror-float-object-has-no-attribute-replace-error-while\n#To avoid with tqdm AttributeError: 'float' object has no attribute\n\ntrain[\"text\"] = train[\"text\"].astype(str)\ntrain[\"text\"] = [x.replace(':',' ') for x in train[\"text\"]]",
+      "total-ns": 768761892
+    },
+    {
+      "raw": "train['clean_text'] = pd.Series([clean_text(i) for i in tqdm(train['text'])])",
+      "total-ns": 110152798468
+    },
+    {
+      "raw": "words = train[\"clean_text\"].values",
+      "total-ns": 115958238
+    },
+    {
+      "raw": "#Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\nls = []\n\nfor i in words:\n    ls.append(str(i))",
+      "total-ns": 33354756
+    },
+    {
+      "raw": "ls[:5]",
+      "total-ns": 414526
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# #Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\n# # The wordcloud \n# plt.figure(figsize=(16,13))\n# wc = WordCloud(background_color=\"lightblue\", colormap='Set2', max_words=1000, max_font_size= 200,  width=1600, height=800)\n# wc.generate(\" \".join(ls))\n# plt.title(\"Most discussed terms\", fontsize=20)\n# plt.imshow(wc.recolor( colormap= 'Set2' , random_state=17), alpha=0.98, interpolation=\"bilinear\", )\n# plt.axis('off')",
+      "total-ns": 438977
+    },
+    {
+      "raw": "#Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\nmost_pop = train.sort_values('likecount', ascending =False)[['text', 'likecount']].head(12)\n\nmost_pop['target1'] = most_pop['likecount']/1000",
+      "total-ns": 728598037
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n\n# #Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\n# plt.figure(figsize = (30,35))\n\n# sns.barplot(data = most_pop, y = 'text', x = 'target1', color = 'c')\n# plt.xticks(fontsize=50, rotation=0)\n# plt.yticks(fontsize=50, rotation=0)\n# plt.xlabel('Votes in Thousands', fontsize = 21)\n# plt.ylabel('')\n# plt.title('Most popular tweets', fontsize = 50);",
+      "total-ns": 220879
+    },
+    {
+      "raw": "import collections.abc\n#gensim aliases to be done manually.\ncollections.Iterable = collections.abc.Iterable\ncollections.Mapping = collections.abc.Mapping\ncollections.MutableSet = collections.abc.MutableSet\ncollections.MutableMapping = collections.abc.MutableMapping\nimport gensim\nfrom gensim.utils import simple_preprocess\nfrom gensim.parsing.preprocessing import STOPWORDS\nfrom nltk.stem import WordNetLemmatizer, SnowballStemmer\nfrom nltk.stem.porter import *\nimport numpy as np\nnp.random.seed(2018)\nimport nltk",
+      "total-ns": 318159133
+    },
+    {
+      "raw": "stemmer = SnowballStemmer('english')",
+      "total-ns": 312809
+    },
+    {
+      "raw": "# STEFANOS: Disable. Connects to net.\n# nltk.download('wordnet')",
+      "total-ns": 117674
+    },
+    {
+      "raw": "#Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\ndef lemmatize_stemming(text):\n    return stemmer.stem(WordNetLemmatizer().lemmatize(text, pos='v'))\n\ndef preprocess(text):\n    result = []\n    for token in gensim.utils.simple_preprocess(text):\n        if token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3:\n            result.append(lemmatize_stemming(token))\n    return result",
+      "total-ns": 706042
+    },
+    {
+      "raw": "train['text'].iloc[2]",
+      "total-ns": 41630920
+    },
+    {
+      "raw": "import nltk\n# STEFANOS: Disable. Connects to net.\n# nltk.download('omw-1.4')",
+      "total-ns": 260372
+    },
+    {
+      "raw": "#Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\ndoc_sample = train['text'].iloc[1]\nprint('original document: ')\n\nwords = []\n\nfor word in doc_sample.split(' '):\n    words.append(word)\n    \n    \nprint(words)\nprint('\\n\\n tokenized and lemmatized document: ')\nprint(preprocess(doc_sample))",
+      "total-ns": 1370277547
+    },
+    {
+      "raw": "train['text'] = train['text'].astype(str)",
+      "total-ns": 53950886
+    },
+    {
+      "raw": "#Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\nwords = []\n\nfor i in train['text']:\n        words.append(i.split(' '))",
+      "total-ns": 661329400
+    },
+    {
+      "raw": "#Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\ndictionary = gensim.corpora.Dictionary(words)\n\ncount = 0\nfor k, v in dictionary.iteritems():\n    print(k, v)\n    count += 1\n    if count > 10:\n        break",
+      "total-ns": 3503357253
+    },
+    {
+      "raw": "bow_corpus = [dictionary.doc2bow(doc) for doc in words]\nbow_corpus[4310]",
+      "total-ns": 2356538762
+    },
+    {
+      "raw": "#Code by Leon Wolber https://www.kaggle.com/leonwolber/reddit-nlp-topic-modeling-prediction\n\nbow_doc_4310 = bow_corpus[4310]\n\nfor i in range(len(bow_doc_4310)):\n    print(\"Word {} (\\\"{}\\\") appears {} time.\".format(bow_doc_4310[i][0], \n                                               dictionary[bow_doc_4310[i][0]], \nbow_doc_4310[i][1]))",
+      "total-ns": 588619
+    },
+    {
+      "raw": "# STEFANOS: Disable the rest. It's ML.",
+      "total-ns": 143711
+    }
+  ]
+}

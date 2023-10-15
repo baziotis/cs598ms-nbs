@@ -1,0 +1,424 @@
+{
+  "cells": [
+    {
+      "raw": "# This Python 3 environment comes with many helpful analytics libraries installed\n# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n# For example, here's several helpful packages to load\n\nimport numpy as np # linear algebra\nimport os\nimport pandas as pd\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nsns.set()\n\n# Input data files are available in the read-only \"../input/\" directory\n# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n\nimport os\nfor dirname, _, filenames in os.walk('/kaggle/input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))\n\n# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session",
+      "total-ns": 2559040999
+    },
+    {
+      "raw": "df = pd.read_csv(\"../input/adidas-us-retail-products-dataset/adidas.csv\")",
+      "total-ns": 26667190
+    },
+    {
+      "raw": "factor = 1000\ndf = pd.concat([df]*factor)\ndf.info()",
+      "total-ns": 2031030748
+    },
+    {
+      "raw": "# First 5 records in the DataFrame\n\ndf.head()",
+      "total-ns": 398053
+    },
+    {
+      "raw": "# Checking for Null Values in the DataFrame\n\ndf.isna().sum()\n\n# There 16 Null Values for Original_price Column",
+      "total-ns": 1416179278
+    },
+    {
+      "raw": "# Shape of the DataFrame\n\ndf.shape",
+      "total-ns": 399097
+    },
+    {
+      "raw": "# Information about the DataFrame\n\ndf.info()",
+      "total-ns": 1640660636
+    },
+    {
+      "raw": "# Correlation Between Columns\n\ndf.corr()",
+      "total-ns": 54423599
+    },
+    {
+      "raw": "# Statistical informtion about the DataFrame\n\ndf.describe().T",
+      "total-ns": 74414592
+    },
+    {
+      "raw": "# The Percentage of Missing Values in the 'original_price' Column\n\n100 * (df['original_price'].isna().sum() / len(df))\n\n# As the percntage of Null Records is less than 5%, hence dropping the Null record Rows",
+      "total-ns": 22140896
+    },
+    {
+      "raw": "# Dropping Null Values in the DataFrame\n\ndf.dropna(inplace=True, axis=0)",
+      "total-ns": 1892535749
+    },
+    {
+      "raw": "# Checking for Null Values in the DataFrame\n\ndf.isna().sum()",
+      "total-ns": 1289225379
+    },
+    {
+      "raw": "# Dropping 'currency' column as all records have 'USD' as currency\n# Dropping 'source' column as all records have 'adidas United States' as value\n# Dropping 'brand', 'country', 'language' columns as all records have same value\n\ndf.drop([ 'brand', 'country', 'language', 'source_website', 'images', 'crawled_at', 'url', 'sku', 'currency','source', 'description'], axis=1, inplace=True)",
+      "total-ns": 72860719
+    },
+    {
+      "raw": "# First 5 records in the DataFrame\n\ndf.head()",
+      "total-ns": 358516
+    },
+    {
+      "raw": "# Removing '$' from the DataFrame\n\ndf['original_price'] = df['original_price'].str.split('$')\ndf['original_price'] = df['original_price'].str[1]",
+      "total-ns": 1070953158
+    },
+    {
+      "raw": "# First 5 records in the DataFrame\n\ndf.head()",
+      "total-ns": 446526
+    },
+    {
+      "raw": "# Shape of the DataFrame\n\ndf.shape",
+      "total-ns": 235913
+    },
+    {
+      "raw": "# Checking the Data Types for the columns\n\ndf.dtypes",
+      "total-ns": 295127
+    },
+    {
+      "raw": "# Creating 'Category' Column\n\ndf['Category'] = df['breadcrumbs'].str.split(\"/\")\ndf['Category'] = df['Category'].str[0]",
+      "total-ns": 1434878531
+    },
+    {
+      "raw": "# Creating 'Product Type' Column\n\ndf['Product_Type'] = df['breadcrumbs'].str.split(\"/\")\ndf['Product_Type'] = df['Product_Type'].str[1]",
+      "total-ns": 1523028392
+    },
+    {
+      "raw": "# Droping 'breadcrumbs' Column\n\ndf.drop(['breadcrumbs', 'category'], axis=1, inplace=True)",
+      "total-ns": 87938310
+    },
+    {
+      "raw": "# Changing the DataType of 'original_price' from object to int64\n\ndf['original_price'] = df['original_price'].astype('int64')",
+      "total-ns": 79391719
+    },
+    {
+      "raw": "# Checking the Data Types for the columns\n\ndf.dtypes",
+      "total-ns": 527569
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.heatmap(df.corr(), annot=True, cmap='magma')\n# plt.show();",
+      "total-ns": 137183
+    },
+    {
+      "raw": "# Distribution Plot for selling price\n\n# STEFANOS: Disable plotting\n# sns.displot(df['selling_price'], kde=True);\n\n# The Below Graph is 'Right Skewed' with Majority of Data falling between 10-70.",
+      "total-ns": 229763
+    },
+    {
+      "raw": "# Distribution Plot for origial price\n\n# STEFANOS: Disable plotting\n# sns.displot(df['original_price'], kde=True);\n\n# The Below Graph is 'Right Skewed' with Majority of Data falling between 10-90.",
+      "total-ns": 146338
+    },
+    {
+      "raw": "# Distribution Plot for average rating\n\n# STEFANOS: Disable plotting\n# sns.displot(df['average_rating'], kde=True);\n\n# The Below Graph is 'Left Skewed' with Majority of Data falling between 4.2-5.0.",
+      "total-ns": 89678
+    },
+    {
+      "raw": "# Distribution Plot for reviews count\n\n# STEFANOS: Disable plotting\n# sns.displot(df['reviews_count'], kde=True);\n\n# The Below Graph is 'Right Skewed' with Majority of Data falling below 600.",
+      "total-ns": 86297
+    },
+    {
+      "raw": "# No.of Unique Products in the DataFrame\n\ndf['name'].nunique()",
+      "total-ns": 63983611
+    },
+    {
+      "raw": "# Top 10 - Products sold in the DataFrame\n\ndf['name'].value_counts()[:10]",
+      "total-ns": 29093438
+    },
+    {
+      "raw": "# Top 5 - Products sold in the DataFrame\n\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(12,4))\n# df['name'].value_counts()[:5].plot(kind='barh', color={'#864879','#2D4263','#C84B31', '#ECDBBA', '#B3541E'})\n# plt.ylabel(\"Product Name\")\n# plt.xlabel(\"No.of Units Sold\")\n# plt.title(\"Product Name Vs. No.of Units Sold\")\n# plt.show();\ndf['name'].value_counts()[:5]",
+      "total-ns": 26256090
+    },
+    {
+      "raw": "# No.of Unique selling price in the DataFrame\n\ndf['selling_price'].nunique()",
+      "total-ns": 5525221
+    },
+    {
+      "raw": "# Top 15 - Products interms of similar selling price in the DataFrame\n\ndf['selling_price'].value_counts()[:15]",
+      "total-ns": 12833909
+    },
+    {
+      "raw": "# Top 5 - Products interms of similar selling price in the DataFrame\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(12,4))\n# df['selling_price'].value_counts()[:5].plot(kind='barh', color={'#864879','#2D4263','#C84B31', '#ECDBBA', '#B3541E'})\n# plt.ylabel(\"Product Selling Price ($USD)\")\n# plt.xlabel(\"No.of Products\")\n# plt.title(\"Product Selling Price ($USD) Vs. No.of Products\")\n# plt.show();\ndf['selling_price'].value_counts()[:5]",
+      "total-ns": 5692198
+    },
+    {
+      "raw": "# Top 15 - Products interms of similar selling price in the DataFrame\n\n# STEFANOS: Disable plotting\n# labels = df['selling_price'].value_counts().head(15).index\n# pie, ax = plt.subplots(figsize=[20,8])\n# plt.pie(x=df['selling_price'].value_counts().head(15).values, autopct=\"%.1f%%\", explode=[0.06]*15, labels=labels, pctdistance=0.5)\n# plt.title(\"Top 15 - Products interms of similar selling price ($USD)\", fontsize=14);",
+      "total-ns": 257651
+    },
+    {
+      "raw": "# Maximum Selling Price\n\nprint(\"The Maximun Selling Price is:\",df['selling_price'].max(),\"USD\")",
+      "total-ns": 990849
+    },
+    {
+      "raw": "# Minimum Selling Price\n\nprint(\"The Minimum Selling Price is:\",df['selling_price'].min(),\"USD\")",
+      "total-ns": 1184253
+    },
+    {
+      "raw": "# Average Selling Price\n\nprint(\"The Average Selling Price is:\",round(df['selling_price'].mean(),2),\"USD\")",
+      "total-ns": 4999530
+    },
+    {
+      "raw": "# Top 10 - Highest Selling Prices in USD\n\nset(df['selling_price'].sort_values(ascending=False)[:30].values)",
+      "total-ns": 63758157
+    },
+    {
+      "raw": "# Top 10 - Least Selling Prices in USD\n\nset(df['selling_price'].sort_values()[:40].values)",
+      "total-ns": 54855884
+    },
+    {
+      "raw": "# No.of Unique original price in the DataFrame\n\ndf['original_price'].nunique()",
+      "total-ns": 5002987
+    },
+    {
+      "raw": "# Top 15 - Products interms of similar original price in the DataFrame\n\ndf['original_price'].value_counts()[:15]",
+      "total-ns": 7363217
+    },
+    {
+      "raw": "# Top 5 - Products interms of similar origial price in the DataFrame\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(12,4))\n# df['original_price'].value_counts()[:5].plot(kind='barh', color={'#864879','#2D4263','#C84B31', '#ECDBBA', '#B3541E'})\n# plt.ylabel(\"Original Product Price ($USD)\")\n# plt.xlabel(\"No.of Products\")\n# plt.title(\"Original Product Price ($USD) Vs. No.of Products\")\n# plt.show();\ndf['original_price'].value_counts()[:5]",
+      "total-ns": 5465112
+    },
+    {
+      "raw": "# Top 15 - Products interms of similar Original price in the DataFrame\n\n# STEFANOS: Disable plotting\n# labels = df['original_price'].value_counts().head(15).index\n# pie, ax = plt.subplots(figsize=[20,8])\n# plt.pie(x=df['original_price'].value_counts().head(15).values, autopct=\"%.1f%%\", explode=[0.06]*15, labels=labels, pctdistance=0.5)\n# plt.title(\"Top 15 - Products interms of similar original price ($USD)\", fontsize=14);",
+      "total-ns": 190826
+    },
+    {
+      "raw": "# Maximum Original Price\n\nprint(\"The Maximun Original Price is:\",df['original_price'].max(),\"USD\")",
+      "total-ns": 899412
+    },
+    {
+      "raw": "# Minimum Original Price\n\nprint(\"The Minimum Original Price is:\",df['original_price'].min(),\"USD\")",
+      "total-ns": 1143203
+    },
+    {
+      "raw": "# Average Original Price\n\nprint(\"The Average Original Price is:\",round(df['original_price'].mean(),2),\"USD\")",
+      "total-ns": 1282060
+    },
+    {
+      "raw": "# Top 10 - Highest Original Prices in USD\n\nset(df['original_price'].sort_values(ascending=False)[:80].values)",
+      "total-ns": 59476468
+    },
+    {
+      "raw": "# Top 10 - Least Original Prices in USD\n\nset(df['original_price'].sort_values().values[:100])",
+      "total-ns": 55784338
+    },
+    {
+      "raw": "# Calculating Discount\n\ndf['Discount'] = df['original_price'] - df['selling_price']",
+      "total-ns": 3681537
+    },
+    {
+      "raw": "# No.of Unique Discount in the DataFrame\n\ndf['Discount'].nunique()",
+      "total-ns": 5009648
+    },
+    {
+      "raw": "# Top 15 - Highest Discount Amount in the DataFrame\n\nlist(set(df['Discount'].unique()))[-15::]",
+      "total-ns": 5265575
+    },
+    {
+      "raw": "# Top 15 - Least Discount Amount in the DataFrame\n\nlist(set(df['Discount'].unique()))[:15]",
+      "total-ns": 4884930
+    },
+    {
+      "raw": "# Top 15 - Most Given Discount Amount in the DataFrame\n\ndf['Discount'].value_counts()[:15]",
+      "total-ns": 5536973
+    },
+    {
+      "raw": "# Top 5 - Most Given Discount Amount in the DataFrame\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(12,4))\n# df['Discount'].value_counts()[:5].plot(kind='barh', color={'#864879','#2D4263','#C84B31', '#ECDBBA', '#B3541E'})\n# plt.ylabel(\"Discount Amount\")\n# plt.xlabel(\"No.of times Particular Disount Amount Given\")\n# plt.title(\"Discount Amount Vs. No.of times Particular Disount Amount Given\")\n# plt.show();\ndf['Discount'].value_counts()[:5]",
+      "total-ns": 4995450
+    },
+    {
+      "raw": "# Top 15 - Most Given Discount Amount in the DataFrame\n\nlabels = df['Discount'].value_counts().head(15).index\n# STEFANOS: Disable plotting\n# pie, ax = plt.subplots(figsize=[20,8])\n# plt.pie(x=df['Discount'].value_counts().head(15).values, autopct=\"%.1f%%\", explode=[0.06]*15, labels=labels, pctdistance=0.5)\n# plt.title(\"Top 15 - Most Given Discount Amount in the DataFrame\", fontsize=14);\n_ = df['Discount'].value_counts().head(15).values",
+      "total-ns": 10153338
+    },
+    {
+      "raw": "# Calculating Discount percentage(%)\n\ndf['Discount(%)'] = round(((df['original_price'] - df['selling_price']) / (df['original_price']))*100,2)",
+      "total-ns": 11181801
+    },
+    {
+      "raw": "# No.of Unique Discount Percentage(%) in the DataFrame\n\ndf['Discount(%)'].nunique()",
+      "total-ns": 8187553
+    },
+    {
+      "raw": "# Top 15 - Highest Discount Percentage(%) in the DataFrame\n\ntop_discount_percnet = list(set(df['Discount(%)'].unique()))\ntop_discount_percnet.sort(reverse=True)\nprint(top_discount_percnet[:15])",
+      "total-ns": 8564293
+    },
+    {
+      "raw": "# Top 15 - Least Discount Percentage(%) in the DataFrame\n\nleast_discount_percnet = list(set(df['Discount(%)'].unique()))\nleast_discount_percnet.sort(reverse=False)\nprint(least_discount_percnet[:15])",
+      "total-ns": 7806886
+    },
+    {
+      "raw": "# Top 15 - Most Given Discount Percentage(%) in the DataFrame\n\ndf['Discount(%)'].value_counts().head(15)",
+      "total-ns": 9389088
+    },
+    {
+      "raw": "# Top 5 - Most Given Discount Percentage in the DataFrame\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(12,4))\n# df['Discount(%)'].value_counts().head(5).plot(kind='barh', color={'#864879','#2D4263','#C84B31', '#ECDBBA', '#B3541E'})\n# plt.ylabel(\"Discount Percentage\")\n# plt.xlabel(\"No.of times Particular Disount Percentage Given\")\n# plt.title(\"Discount Percentage Vs. No.of times Particular Disount Percentage Given\")\n# plt.show();\ndf['Discount(%)'].value_counts().head(5)",
+      "total-ns": 8990270
+    },
+    {
+      "raw": "# Top 15 - Most Given Discount Percentage in the DataFrame\n\nlabels = df['Discount(%)'].value_counts().head(15).index\n# STEFANOS: Disable plotting\n# pie, ax = plt.subplots(figsize=[20,15])\n# plt.pie(x=df['Discount(%)'].value_counts().head(15).values, autopct=\"%.1f%%\", explode=[0.06]*15, labels=labels, pctdistance=0.5)\n# plt.title(\"Top 15 - Most Given Discount Percenatage in the DataFrame\", fontsize=14);\n# plt.tight_layout();\n_=df['Discount(%)'].value_counts().head(15).values",
+      "total-ns": 16888111
+    },
+    {
+      "raw": "# Unique colors in the DataFrame\n\ndf['color'].unique()",
+      "total-ns": 23913368
+    },
+    {
+      "raw": "# No.of Unique colors in the DataFrame\n\ndf['color'].nunique()",
+      "total-ns": 24774035
+    },
+    {
+      "raw": "# No.of Products for each Color\n\ndf['color'].value_counts()",
+      "total-ns": 22855137
+    },
+    {
+      "raw": "# No.of Products for each Color\n\nlabels = df['color'].value_counts().index\n# STEFANOS: Disable plotting\n# pie, ax = plt.subplots(figsize=[20,15])\n# plt.pie(x=df['color'].value_counts().values, autopct=\"%.1f%%\", explode=[0.03]*18, labels=labels, pctdistance=0.5)\n# plt.title(\"No.of Products for each Color in the DataFrame\", fontsize=14);\n# plt.tight_layout();\n_ = x=df['color'].value_counts().values",
+      "total-ns": 45289763
+    },
+    {
+      "raw": "# Popular Color in Kids Category\n\ndf.groupby(['Category','color']).size()['Kids']",
+      "total-ns": 114627088
+    },
+    {
+      "raw": "# Popular Color in Womens Category\n\ndf.groupby(['Category','color']).size()['Women']",
+      "total-ns": 114337678
+    },
+    {
+      "raw": "# Popular Color in Mens Category\n\ndf.groupby(['Category','color']).size()['Men']",
+      "total-ns": 104036702
+    },
+    {
+      "raw": "# Unique Availability values in the DataFrame\n\ndf['availability'].unique()",
+      "total-ns": 26638068
+    },
+    {
+      "raw": "# No.of Unique Availability values in the DataFrame\n\ndf['availability'].nunique()",
+      "total-ns": 25136227
+    },
+    {
+      "raw": "# No.of Products according to Avaialability\n\ndf['availability'].value_counts()",
+      "total-ns": 23858804
+    },
+    {
+      "raw": "# Unique Product Type values in the DataFrame\n\ndf['Product_Type'].unique()",
+      "total-ns": 66121813
+    },
+    {
+      "raw": "# No.of Unique Product Type values in the DataFrame\n\ndf['Product_Type'].nunique()",
+      "total-ns": 68722870
+    },
+    {
+      "raw": "# No.of Products according to Product Type\n\ndf['Product_Type'].value_counts()",
+      "total-ns": 62626674
+    },
+    {
+      "raw": "# No.of Products according to Product Type\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(12,4))\n# df['Product_Type'].value_counts().plot(kind='barh', color={'#864879','#2D4263','#C84B31'})\n# plt.ylabel(\"Product Type\")\n# plt.xlabel(\"No.of Products Sold According to Particular - Product Type\")\n# plt.title(\"Product Type Vs. No.of Products Sold According to Particular - Product Type\")\n# plt.show();\ndf['Product_Type'].value_counts()",
+      "total-ns": 53632374
+    },
+    {
+      "raw": "# No.of Products according to Product Type\n\nlabels = df['Product_Type'].value_counts().index\n# STEFANOS: Disable plotting\n# pie, ax = plt.subplots(figsize=[10,4])\n# plt.pie(x=df['Product_Type'].value_counts().values, autopct=\"%.1f%%\", explode=[0.05]*3, labels=labels, pctdistance=0.5)\n# plt.title(\"No.of Products according to Product Type in the DataFrame\", fontsize=14);\n# plt.tight_layout();\n_ = df['Product_Type'].value_counts().values",
+      "total-ns": 126846293
+    },
+    {
+      "raw": "df.groupby(['Product_Type', 'Category']).max()['selling_price']",
+      "total-ns": 410182490
+    },
+    {
+      "raw": "df.groupby(['Product_Type', 'Category']).min()['selling_price']",
+      "total-ns": 361423175
+    },
+    {
+      "raw": "df.groupby(['Product_Type', 'Category']).mean()['selling_price']",
+      "total-ns": 168178639
+    },
+    {
+      "raw": "# Unique Category values in the DataFrame\n\ndf['Category'].unique()",
+      "total-ns": 52007872
+    },
+    {
+      "raw": "# No.of Unique Category values in the DataFrame\n\ndf['Category'].nunique()",
+      "total-ns": 51116290
+    },
+    {
+      "raw": "# No.of Products according to Category\n\ndf['Category'].value_counts()",
+      "total-ns": 53347048
+    },
+    {
+      "raw": "# Top-5 Products according to Category\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(12,4))\n# df['Category'].value_counts().head(5).plot(kind='barh', color={'#864879','#2D4263','#C84B31', '#ECDBBA', '#B3541E'})\n# plt.ylabel(\"Category\")\n# plt.xlabel(\"No.of Products Sold According to Particular - Category\")\n# plt.title(\"Top 5 - Products Sold according to Category in the DataFrame\")\n# plt.show();\ndf['Category'].value_counts().head(5)",
+      "total-ns": 44756385
+    },
+    {
+      "raw": "# Top-5 Products according to Category\n\nlabels = df['Category'].value_counts().head(5).index\n# STEFANOS: Disable plotting\n# pie, ax = plt.subplots(figsize=[10,4])\n# plt.pie(x=df['Category'].value_counts().head(5).values, autopct=\"%.1f%%\", explode=[0.05]*5, labels=labels, pctdistance=0.5)\n# plt.title(\"Top 5 - Products Sold according to Category in the DataFrame\", fontsize=14);\n# plt.tight_layout();\n_ = df['Category'].value_counts().head(5).values",
+      "total-ns": 89774301
+    },
+    {
+      "raw": "# Unique 'Average Rating'in the DataFrame\n\ndf['average_rating'].unique()",
+      "total-ns": 7215029
+    },
+    {
+      "raw": "# No.of Unique 'Average Rating'in the DataFrame\n\ndf['average_rating'].nunique()",
+      "total-ns": 7110608
+    },
+    {
+      "raw": "# No.of time particular Average Rating Provided\n\ndf['average_rating'].value_counts()",
+      "total-ns": 8163565
+    },
+    {
+      "raw": "# Top 5 - Average Rating Provided\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(12,4))\n# df['average_rating'].value_counts().head(5).plot(kind='barh', color={'#864879','#2D4263','#C84B31', '#ECDBBA', '#B3541E'})\n# plt.ylabel(\"Average Rating\")\n# plt.xlabel(\"No.of times particular rating provided\")\n# plt.title(\"Top 5 - Average Rating Provided in the DataFrame\")\n# plt.show();\ndf['average_rating'].value_counts().head(5)",
+      "total-ns": 7578197
+    },
+    {
+      "raw": "# Top 5 - Average Rating Provided\n\nlabels = df['average_rating'].value_counts().head(5).index\n# STEFANOS: Disable plotting\n# pie, ax = plt.subplots(figsize=[10,4])\n# plt.pie(x=df['average_rating'].value_counts().head(5).values, autopct=\"%.1f%%\", explode=[0.05]*5, labels=labels, pctdistance=0.5)\n# plt.title(\"# Top 5 - Average Rating Provided in the DataFrame\", fontsize=14);\n# plt.tight_layout();\n_ = df['average_rating'].value_counts().head(5).values",
+      "total-ns": 15171446
+    },
+    {
+      "raw": "# Maxmimum Average Rating\n\ndf['average_rating'].max()",
+      "total-ns": 2244629
+    },
+    {
+      "raw": "# Minimum Average Rating\n\ndf['average_rating'].min()",
+      "total-ns": 2151438
+    },
+    {
+      "raw": "# Mean Average Rating\n\nround(df['average_rating'].mean(),2)",
+      "total-ns": 1900498
+    },
+    {
+      "raw": "# Maximum Average Rating across 'Product Type' and 'Category'\n\ndf.groupby(['Product_Type', 'Category']).max()['average_rating']",
+      "total-ns": 357476048
+    },
+    {
+      "raw": "# Minimum Average Rating across 'Product Type' and 'Category'\n\ndf.groupby(['Product_Type', 'Category']).min()['average_rating']",
+      "total-ns": 853623224
+    },
+    {
+      "raw": "# No.of Unique 'Reviews Count' in the DataFrame\n\ndf['reviews_count'].nunique()",
+      "total-ns": 8212158
+    },
+    {
+      "raw": "# Top 10 - 'Reviews Count' and no.of particular 'Reviews Count' occurances\n\ndf['reviews_count'].value_counts().head(10)",
+      "total-ns": 8445111
+    },
+    {
+      "raw": "# Top 5 - 'Reviews Count' and no.of particular 'Reviews Count' occurances\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(12,4))\n# df['average_rating'].value_counts().head(5).plot(kind='barh', color={'#864879','#2D4263','#C84B31', '#ECDBBA', '#B3541E'})\n# plt.ylabel('Reviews Count')\n# plt.xlabel('no.of particular Reviews Count occurances')\n# plt.title(\"Top 5 - 'Reviews Count' and no.of particular 'Reviews Count' occurances\")\n# plt.show();\ndf['average_rating'].value_counts().head(5)",
+      "total-ns": 12247555
+    },
+    {
+      "raw": "# Maxmimum 'Reviews Count'\n\ndf['reviews_count'].max()",
+      "total-ns": 1487728
+    },
+    {
+      "raw": "# Minimum 'Reviews Count'\n\ndf['reviews_count'].min()",
+      "total-ns": 1520240
+    },
+    {
+      "raw": "# Mean 'Reviews Count'\n\nround(df['reviews_count'].mean(),2)",
+      "total-ns": 1871516
+    },
+    {
+      "raw": "# Maximum 'Reviews Count' across 'Product Type' and 'Category'\n\ndf.groupby(['Product_Type', 'Category']).max()['reviews_count']",
+      "total-ns": 416622388
+    },
+    {
+      "raw": "# Minimum Reviews Count' across 'Product Type' and 'Category'\n\ndf.groupby(['Product_Type', 'Category']).min()['reviews_count']",
+      "total-ns": 410107556
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.scatterplot(data=df, x='average_rating', y='reviews_count')",
+      "total-ns": 175169
+    }
+  ]
+}

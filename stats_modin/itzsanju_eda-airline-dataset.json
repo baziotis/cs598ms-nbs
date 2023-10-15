@@ -1,0 +1,72 @@
+{
+  "cells": [
+    {
+      "raw": "import numpy as np # linear algebra\nimport pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\nimport os\nfor dirname, _, filenames in os.walk('../input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))\n",
+      "total-ns": 1411782374
+    },
+    {
+      "raw": "df=pd.read_csv(\"../input/Airline Dataset Updated.csv\", parse_dates=[\"Departure Date\"])",
+      "total-ns": 363991026
+    },
+    {
+      "raw": "df.head(11)",
+      "total-ns": 490401
+    },
+    {
+      "raw": "df.info() ",
+      "total-ns": 155008165
+    },
+    {
+      "raw": "df.nunique()",
+      "total-ns": 93535908
+    },
+    {
+      "raw": "df.isnull().sum().sum() #Checking if Null value is present",
+      "total-ns": 178920515
+    },
+    {
+      "raw": "df['Gender']=df['Gender'].astype('category')\ndf['Gender'].unique()",
+      "total-ns": 19116637
+    },
+    {
+      "raw": "df['Age']=df['Age'].astype(int)",
+      "total-ns": 717433
+    },
+    {
+      "raw": "columns = [key for key, value in df.nunique().to_dict().items() if value < 10]",
+      "total-ns": 88653793
+    },
+    {
+      "raw": "count_1 = df['Gender'].value_counts()\ncount_1",
+      "total-ns": 1153031
+    },
+    {
+      "raw": "count_2 = df['Country Name'].value_counts()",
+      "total-ns": 6981579
+    },
+    {
+      "raw": "df_c= pd.DataFrame(count_2).reset_index().rename(columns={\"index\": \"value\", 0: \"count\"})",
+      "total-ns": 1824860
+    },
+    {
+      "raw": "con=df.loc[:,['Country Name','Continents']]\ncon=con.drop_duplicates()\n#new_df=pd.merge_ordered(df_c,con, fill_method= 'ffill', on= 'Country Name')",
+      "total-ns": 15073932
+    },
+    {
+      "raw": "nationality = pd.DataFrame(df['Nationality'].value_counts()).reset_index()",
+      "total-ns": 8439977
+    },
+    {
+      "raw": "nationality = nationality.head(20)",
+      "total-ns": 532598
+    },
+    {
+      "raw": "nationality.sort_values(by='Nationality', ascending=False, inplace=True)",
+      "total-ns": 998729
+    },
+    {
+      "raw": "fl_stat = pd.DataFrame(df['Flight Status'].value_counts()).reset_index()",
+      "total-ns": 7315313
+    }
+  ]
+}

@@ -1,0 +1,152 @@
+{
+  "cells": [
+    {
+      "raw": "# This Python 3 environment comes with many helpful analytics libraries installed\n# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n# For example, here's several helpful packages to load\n\nimport numpy as np # linear algebra\nimport os\nimport pandas as pd\nimport seaborn as sns  # data visualization\nimport matplotlib.pyplot as plt\n\n\n# Input data files are available in the read-only \"../input/\" directory\n# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n\nimport os\nfor dirname, _, filenames in os.walk('../input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))\n\n# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session",
+      "total-ns": 2162074779
+    },
+    {
+      "raw": "vlgr_df = pd.read_csv(\"../input/animal-crossing-new-horizons-nookplaza-dataset/villagers.csv\")\npopul_df = pd.read_csv(\"../input/acnh-villager-popularity/acnh_villager_data.csv\")",
+      "total-ns": 8284458
+    },
+    {
+      "raw": "factor = 400\nif \"IREWR_LESS_REPLICATION\" in os.environ and os.environ[\"IREWR_LESS_REPLICATION\"] == \"True\":\n    factor = factor//3\npopul_df = pd.concat([popul_df]*factor, ignore_index=True)\nvlgr_df = pd.concat([vlgr_df]*factor, ignore_index=True)\nprint(popul_df.info())\nvlgr_df.info()",
+      "total-ns": 382219148
+    },
+    {
+      "raw": "vlgr_df.head()",
+      "total-ns": 432722
+    },
+    {
+      "raw": "popul_df.head()",
+      "total-ns": 229940
+    },
+    {
+      "raw": "vlgr_df.info()",
+      "total-ns": 241067226
+    },
+    {
+      "raw": "popul_df.info()",
+      "total-ns": 17078019
+    },
+    {
+      "raw": "# There are some missing/non-matching names \nvlgr_df[\"Name\"].isin(popul_df['name']).sum()",
+      "total-ns": 8462457
+    },
+    {
+      "raw": "# vlgr_df does not have these names...\nmismatch_names = popul_df[\"name\"][popul_df[\"name\"].isin(vlgr_df[\"Name\"]) == False]\nmismatch_names",
+      "total-ns": 8389381
+    },
+    {
+      "raw": "# %%time\n# Data set is small enough to pick out the same names\n# Correcting names in popul_df to match vlgr_df\npopul_df['name'] = popul_df['name'].replace(['OHare'],\"O\\'Hare\")\npopul_df['name'] = popul_df['name'].replace(['Buck(Brows)'],\"Buck\")\npopul_df['name'] = popul_df['name'].replace(['Renee'],\"Ren\u00e9e\")\npopul_df['name'] = popul_df['name'].replace(['WartJr'],\"Wart Jr.\")\npopul_df['name'] = popul_df['name'].replace(['Crackle(Spork)'],\"Spork\")",
+      "total-ns": 55638435
+    },
+    {
+      "raw": "# Checking if All names match\nvlgr_df[\"Name\"].isin(popul_df['name']).sum()",
+      "total-ns": 9497571
+    },
+    {
+      "raw": "# drop villagers that are in popul_df but not in vlgr_df\npopul_df = popul_df.drop(popul_df[popul_df[\"name\"].isin(vlgr_df[\"Name\"]) == False].index)",
+      "total-ns": 16901008
+    },
+    {
+      "raw": "# Now that both df have same length, we can set index as names and combine the 2 dfs\npopul_df.set_index('name', drop=True, inplace=True)\nvlgr_df.set_index('Name', drop=True, inplace=True)",
+      "total-ns": 1660876
+    },
+    {
+      "raw": "combined_df = popul_df.merge(vlgr_df, left_index=True, right_index=True)",
+      "total-ns": 63070794905
+    },
+    {
+      "raw": "# drop irrelevent columns\ncombined_df.drop(columns=['Furniture List', 'Filename', 'Unique Entry ID', \"Wallpaper\", \"Flooring\", \"Birthday\", \"Favorite Song\"], inplace=True)",
+      "total-ns": 30361814186
+    },
+    {
+      "raw": "combined_df.sort_values(['tier', 'rank'], inplace=True)\ncombined_df['overall_ranking'] = np.arange(1, len(combined_df)+1)\ncombined_df.insert(2, 'overall_ranking', combined_df.pop('overall_ranking'))",
+      "total-ns": 32330510565
+    },
+    {
+      "raw": "overall_mean = combined_df.overall_ranking.mean()\nprint(f'The overall_mean is {overall_mean}, this would serve as a baseline for to compare against popularity performance of our features.')",
+      "total-ns": 79616065
+    },
+    {
+      "raw": "combined_df.columns",
+      "total-ns": 12039232
+    },
+    {
+      "raw": "combined_df['Gender'].value_counts()",
+      "total-ns": 1762911202
+    },
+    {
+      "raw": "## -- STEFANOS: Disable plotting\n# combined_df.groupby('tier').Gender.value_counts().plot.barh()\n## -- STEFANOS-DISABLE-FOR-MODIN: Actually, it seems we can't even run the last part with Modin, so\n## we only leave the groupby.\n# combined_df.groupby('tier').Gender.value_counts()\ncombined_df.groupby('tier')",
+      "total-ns": 5767056
+    },
+    {
+      "raw": "## -- STEFANOS: Disable plotting\n# plt.figure(figsize=(5, 5))\n# plt.axhline(overall_mean, color='r')\n# sns.boxplot(x=\"Gender\", y='overall_ranking', data=combined_df)",
+      "total-ns": 251400
+    },
+    {
+      "raw": "pd.pivot_table(combined_df, index = 'tier', values = 'Catchphrase', columns=\"Gender\", aggfunc='count')",
+      "total-ns": 54402714736
+    },
+    {
+      "raw": "# creating value counts dataframe for each species type\nspecies_ranking = combined_df.groupby('Species').mean()['overall_ranking'].to_frame().reset_index().sort_values('overall_ranking')\nspecies_ranking",
+      "total-ns": 6588449217
+    },
+    {
+      "raw": "## -- STEFANOS: Disable plotting\n# plt.figure(figsize=(30,5))\n# sns.set(font_scale=1.4)\n# plt.xticks(rotation=45)\n# plt.axhline(overall_mean, color='r')\n# sns.scatterplot(x='Species', y=\"overall_ranking\", data=species_ranking,label='mean overall-ranking', s=300)",
+      "total-ns": 900156
+    },
+    {
+      "raw": "## -- STEFANOS: Disable plotting\n# plt.figure(figsize=(30, 10))\n# plt.axhline(overall_mean, color='r')\n# sns.scatterplot(x=\"Species\", y='overall_ranking', hue='tier', s=100, data=combined_df)",
+      "total-ns": 166965
+    },
+    {
+      "raw": "combined_df.Personality.value_counts()",
+      "total-ns": 2469403405
+    },
+    {
+      "raw": "# creating value counts dataframe for each personality type\npersonality_ranking = combined_df.groupby('Personality').mean()['overall_ranking'].to_frame().reset_index().sort_values('overall_ranking')",
+      "total-ns": 4326117807
+    },
+    {
+      "raw": "## -- STEFANOS: Disable plotting\n# plt.figure(figsize=(20,5))\n# sns.set(font_scale=1.4)\n# plt.xticks(rotation=45)\n# plt.axhline(overall_mean, color='r')\n# sns.scatterplot(x='Personality', y=\"overall_ranking\", data=personality_ranking,label='mean personality ranking', s=300)",
+      "total-ns": 182096
+    },
+    {
+      "raw": "## -- STEFANOS: Disable plotting\n# plt.figure(figsize=(10, 10))\n# plt.axhline(overall_mean, color='r')\n# sns.boxplot(x=\"Personality\", y='overall_ranking', data=combined_df)",
+      "total-ns": 153746
+    },
+    {
+      "raw": "pd.pivot_table(combined_df, index = 'tier', values = 'Catchphrase', columns=\"Personality\", aggfunc='count')",
+      "total-ns": 14440233977
+    },
+    {
+      "raw": "# generating value counts dataframe for each style type\nstyle_ranking1 = combined_df.groupby('Style 1').mean()['overall_ranking'].to_frame().reset_index().sort_values('overall_ranking')\nstyle_ranking2 = combined_df.groupby('Style 2').mean()['overall_ranking'].to_frame().reset_index().sort_values('overall_ranking')",
+      "total-ns": 9793110496
+    },
+    {
+      "raw": "# combining the 2 style columns and finding a mean\nstyle_ranking = style_ranking1.copy()\nstyle_series = (style_ranking1['overall_ranking'] + style_ranking2['overall_ranking'])/2\nstyle_ranking[\"overall_ranking\"] = style_series",
+      "total-ns": 36225212
+    },
+    {
+      "raw": "style_ranking",
+      "total-ns": 1712428
+    },
+    {
+      "raw": "## -- STEFANOS: Disable plotting\n# plt.figure(figsize=(20,5))\n# sns.set(font_scale=1.4)\n# plt.xticks(rotation=45)\n# plt.axhline(overall_mean, color='r')\n# sns.scatterplot(x='Style 1', y=\"overall_ranking\", data=style_ranking, s=300)",
+      "total-ns": 119229
+    },
+    {
+      "raw": "## -- STEFANOS: Disable plotting\n# plt.figure(figsize=(7, 7))\n# plt.axhline(overall_mean, color='r')\n# sns.boxplot(x=\"Style 1\", y='overall_ranking', data=combined_df)\n# plt.title('Style 1')\n# plt.figure(figsize=(7, 7))\n# plt.axhline(overall_mean, color='r')\n# sns.boxplot(x=\"Style 2\", y='overall_ranking', data=combined_df)\n# plt.title('Style 2')",
+      "total-ns": 100824
+    },
+    {
+      "raw": "pd.pivot_table(combined_df, index = 'tier', values = 'Catchphrase', columns=\"Style 1\", aggfunc='count')",
+      "total-ns": 13966542096
+    },
+    {
+      "raw": "pd.pivot_table(combined_df, index = 'tier', values = 'Catchphrase', columns=\"Style 2\", aggfunc='count')",
+      "total-ns": 13964760008
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "cells": [
+    {
+      "raw": "#importing libraries\n\nimport os\nos.environ[\"MODIN_ENGINE\"] = \"ray\"\nimport ray\nos.environ['MODIN_CPUS'] = \"4\"\nray.init(num_cpus=4, runtime_env={'env_vars': {'__MODIN_AUTOIMPORT_PANDAS__': '1'}})\nimport modin.pandas as pd\nimport numpy as np\npd.set_option('display.max_columns',None)\npd.set_option('display.max_rows',None)\nimport warnings\nwarnings.filterwarnings('ignore')",
+      "total-ns": 4627824174
+    },
+    {
+      "raw": "#loading dataset\ndata=pd.read_csv('../input/melb_data.csv')\ndf=data.copy()",
+      "total-ns": 5565270503
+    },
+    {
+      "raw": "df.head()",
+      "total-ns": 1094050
+    },
+    {
+      "raw": "df.describe().T",
+      "total-ns": 30793144
+    },
+    {
+      "raw": "df.info()",
+      "total-ns": 81774038
+    },
+    {
+      "raw": "df.drop(['BuildingArea','Address'],axis=1).head(5)",
+      "total-ns": 2292243
+    },
+    {
+      "raw": "numerical_feature=[feature for feature in df.columns if df[feature].dtype !='object']\nprint('There are {} numerical features.'.format(len(numerical_feature)))\n\nyear=[feature for feature in numerical_feature if \"Yr\" in feature or \"Year\" in feature]\n\ndiscrete_feature=[feature for feature in numerical_feature if (df[feature].nunique())<25 and feature not in year+['Id']]\nprint('There are {} are discrete features'.format(len(discrete_feature)) )\n\ncontinuous_feature=[feature for feature in numerical_feature if feature not in discrete_feature and feature not in year+['Id']]\nprint('There are {} are continuous features'.format(len(continuous_feature)) )\n\ncat_feature=[feature for feature in df.columns if df[feature].dtypes=='object']\nprint('There are {} categorical features.'.format(len(cat_feature)))",
+      "total-ns": 284974541
+    },
+    {
+      "raw": "type={'h':'house','u':'unit','t':'townhouse'}\ndf=df.replace({'Type':type})",
+      "total-ns": 2868092
+    },
+    {
+      "raw": "def outlier_function(df, col_name):\n    first_quartile = np.percentile(np.array(df[col_name].tolist()), 25)\n    third_quartile = np.percentile(np.array(df[col_name].tolist()), 75)\n    IQR = third_quartile - first_quartile\n                      \n    upper_limit = third_quartile+(3*IQR)\n    lower_limit = first_quartile-(3*IQR)\n    outlier_count = 0\n                      \n    for value in df[col_name].tolist():\n        if (value < lower_limit) | (value > upper_limit):\n            outlier_count +=1\n    return lower_limit, upper_limit, outlier_count\nfor feature in continuous_feature:\n    if outlier_function(df,feature)[2] > 1:\n        print('{}: {} outliers'.format(feature,outlier_function(df,feature)[2]))",
+      "total-ns": 489299686
+    },
+    {
+      "raw": "corr=df[continuous_feature].corr()",
+      "total-ns": 55172801
+    },
+    {
+      "raw": "df['price_per_unit_area']=df['Price']/df['Landsize']",
+      "total-ns": 14197284
+    },
+    {
+      "raw": "df[discrete_feature].head(3)",
+      "total-ns": 5925337
+    },
+    {
+      "raw": "for feature in discrete_feature:\n    if outlier_function(df,feature)[2] > 1:\n        print('{}: {} outliers'.format(feature,outlier_function(df,feature)[2]))",
+      "total-ns": 264679333
+    },
+    {
+      "raw": "df['Bedroom2']=df['Bedroom2'].astype('int')\ndf['Bathroom']=df['Bathroom'].astype('int')\ndf['Car']=df['Car'].astype('int',errors='ignore')\ndf['Car']=df['Car'].astype('int',errors='ignore')",
+      "total-ns": 113816080
+    },
+    {
+      "raw": "df[cat_feature].head()",
+      "total-ns": 2944781
+    },
+    {
+      "raw": "df=df.drop(index=9968,axis=1)",
+      "total-ns": 3887902
+    },
+    {
+      "raw": "def d_date(date):\n    return(date[-7:])\ndf['Date']=df['Date'].apply(d_date)",
+      "total-ns": 34705466
+    },
+    {
+      "raw": "corr_matrix=df.corr()\nmask = np.zeros_like(corr_matrix)\nmask[np.triu_indices_from(mask)] = True",
+      "total-ns": 314945693
+    }
+  ]
+}

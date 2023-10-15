@@ -1,0 +1,24 @@
+{
+  "cells": [
+    {
+      "raw": "import pandas as pd\ndf = pd.read_csv(filepath_or_buffer='../input/Airline Dataset.csv', parse_dates=['Departure Date'])\ndf.head()",
+      "total-ns": 2037747537
+    },
+    {
+      "raw": "df.info()",
+      "total-ns": 251846934
+    },
+    {
+      "raw": "df.nunique()",
+      "total-ns": 129580716
+    },
+    {
+      "raw": "df['Departure Date'].dt.year.value_counts()",
+      "total-ns": 10031050
+    },
+    {
+      "raw": "df['Last Name'].value_counts().nlargest(n=10)",
+      "total-ns": 45189663
+    }
+  ]
+}

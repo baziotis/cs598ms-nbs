@@ -1,0 +1,136 @@
+{
+  "cells": [
+    {
+      "raw": "# This Python 3 environment comes with many helpful analytics libraries installed\n# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n# For example, here's several helpful packages to load\n\nimport numpy as np # linear algebra\nimport os\nimport pandas as pd\nimport regex as re # For String searches\nimport plotly.graph_objects as go\nimport plotly.express as px\n# Input data files are available in the read-only \"../input/\" directory\n# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n\nimport os\nfor dirname, _, filenames in os.walk('../input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))\n\n# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session",
+      "total-ns": 1211252547
+    },
+    {
+      "raw": "data = pd.read_csv('../input/speedtest-data-by-ookla/fixed_year_2021_quarter_03.csv')\ndata.head()",
+      "total-ns": 6138077
+    },
+    {
+      "raw": "data.info()",
+      "total-ns": 6547531
+    },
+    {
+      "raw": "Mobile_df = pd.DataFrame([],columns=data.columns)\nBroadband_df = pd.DataFrame([],columns=data.columns)\n\ndef col_name_corrections(df,correction_pair):\n    if set(df.columns).intersection(set(correction_pair.keys())):\n        df.rename(columns=correction_pair,inplace=True)\n    return df\n\nfor dirname, _, filenames in os.walk('../input'):\n    for filename in filenames:\n        meta_info = filename.split('/')[-1]\n        data = pd.read_csv(dirname+'/'+filename,thousands=r',').convert_dtypes()\n        data = col_name_corrections(data,{'Number of Record':'Number of Records'})\n        data['Year'] = np.int64(re.search('year_(.*)_quarter',meta_info).group(1))\n        data['Quarter'] = np.int64(re.search('quarter_(.*).csv',meta_info).group(1))\n        if 'mobile' in meta_info:\n            Mobile_df = pd.concat([Mobile_df,data])\n        else:\n            Broadband_df = pd.concat([Broadband_df,data]) \nprint(Broadband_df.shape)\nprint(Mobile_df.shape)\nMobile_df = Mobile_df.astype({'Year':np.int64,'Quarter':np.int64})\nBroadband_df = Broadband_df.astype({'Year':np.int64,'Quarter':np.int64})\nMobile_df.sort_values(by=['Year','Quarter'],ascending=[True,True],inplace=True)\nBroadband_df.sort_values(by=['Year','Quarter'],ascending=[True,True],inplace=True)",
+      "total-ns": 221848470
+    },
+    {
+      "raw": "Mobile_df.info()",
+      "total-ns": 7886727
+    },
+    {
+      "raw": "factor = 2000\nMobile_df = pd.concat([Mobile_df]*factor, ignore_index=True)\nMobile_df.info()",
+      "total-ns": 1035424810
+    },
+    {
+      "raw": "factor = 1000\nBroadband_df = pd.concat([Broadband_df]*factor, ignore_index=True)\nBroadband_df.info()",
+      "total-ns": 479753689
+    },
+    {
+      "raw": "Mobile_df.head()",
+      "total-ns": 626620
+    },
+    {
+      "raw": "unique_countries_broadband = Broadband_df.groupby('Name').count()\nunique_countries_broadband.head()",
+      "total-ns": 386199860
+    },
+    {
+      "raw": "unique_countries_mobile = Mobile_df.groupby('Name').count()\nunique_countries_mobile.head()",
+      "total-ns": 604066909
+    },
+    {
+      "raw": "# Check for missing values\nMobile_df.isna().any()",
+      "total-ns": 187098320
+    },
+    {
+      "raw": "Broadband_df.isna().any()",
+      "total-ns": 73930482
+    },
+    {
+      "raw": "unique_countries_mobile[unique_countries_mobile.Year < 10]['Year']",
+      "total-ns": 1213685
+    },
+    {
+      "raw": "unique_countries_broadband[unique_countries_broadband.Year < 10]['Year']",
+      "total-ns": 901707
+    },
+    {
+      "raw": "Mobile_Stats = Mobile_df.groupby('Name').agg(\n    Change_Download=('Avg. Avg D Kbps', lambda x: list(x)[-1] - list(x)[0]),\n    Change_Upload=('Avg. Avg U Kbps', lambda x: list(x)[-1] - list(x)[0]),\n    Change_Latency=('Avg Lat Ms', lambda x: list(x)[-1] - list(x)[0])\n)\nBroadband_Stats = Broadband_df.groupby('Name').agg(\n    Change_Download=('Avg. Avg D Kbps', lambda x: list(x)[-1] - list(x)[0]),\n    Change_Upload=('Avg. Avg U Kbps', lambda x: list(x)[-1] - list(x)[0]),\n    Change_Latency=('Avg Lat Ms', lambda x: list(x)[-1] - list(x)[0])\n)\n# fig = px.histogram(Mobile_Stats['Change_Download'],title='Frequency distribution of Mobile Speed change',\n#                    labels={'count':'Frequency','value':'$\\Delta Speed (Kpbs)$','variable':'property'},\n#                    nbins=100)\n# fig.show()\n\n# fig = px.histogram(Broadband_Stats['Change_Download'],title='Frequency distribution of Broadband Speed change',\n#                    labels={'count':'Frequency','value':'$\\Delta Speed (Kpbs)$','variable':'property'},\n#                    nbins=100)\n# fig.show()\nTotal_Stats = pd.concat([Broadband_Stats['Change_Download'],Mobile_Stats['Change_Download']],axis=1)\nTotal_Stats.columns=['Mobile','Broadband']\n\n# STEFANOS: Disable plotting\n# fig = go.Figure(data=[go.Histogram(x=Broadband_Stats['Change_Download'],opacity=0.65,name='Broadband')])\n# fig.add_trace(go.Histogram(x=Mobile_Stats['Change_Download'],opacity=0.65,name='Mobile'))\n# fig.update_layout(barmode='overlay',\n#                   title='Frequency Distribution of Speed change',\n#                   xaxis_title=\"$\\Delta\\ Speed\\ (Kbps)$\", yaxis_title=\"Number of Countries\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 10664698116
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# px.bar(Mobile_Stats,y='Change_Download',labels={'Name':'Country','Change_Download':'Observed Change'},title='Summary of all changes 2020 Q1 - 2022 Q2 ')",
+      "total-ns": 162072
+    },
+    {
+      "raw": "#ImprovedCountries_M = Mobile_Stats[(Mobile_Stats['Change_Download'] < 3000) &\n#                                (Mobile_Stats['Change_Download'] >0)]\n#px.bar(ImprovedCountries_M,y='Change_Download',labels={'Name':'Country','Change_Download':'Improved Download Speed'},title='Countries that improved download speeds')\n\nImprovedCountries_B = Broadband_Stats[(Broadband_Stats['Change_Download'] < 3000) &\n                                (Broadband_Stats['Change_Download'] > 0)]\n\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Improved Speed (Kbps)\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 1621706
+    },
+    {
+      "raw": "#ImprovedCountries2 = Mobile_Stats[(Mobile_Stats['Change_Download'] >= 10000)]\n#px.bar(ImprovedCountries2,y='Change_Download',labels={'Name':'Country','Change_Download':'Improved Download Speed'},title='Countries that improved download speeds')\n#ImprovedCountries_M = Mobile_Stats[(Mobile_Stats['Change_Download'] < 8000) &\n#                                (Mobile_Stats['Change_Download'] >3000)]\n#px.bar(ImprovedCountries_M,y='Change_Download',labels={'Name':'Country','Change_Download':'Improved Download Speed'},title='Countries that improved download speeds')\n\nImprovedCountries_B = Broadband_Stats[(Broadband_Stats['Change_Download'] < 8000) &\n                                (Broadband_Stats['Change_Download'] > 3000)]\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Improved Speed (Kbps)\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 1217450
+    },
+    {
+      "raw": "ImprovedCountries_B = Broadband_Stats[(Broadband_Stats['Change_Download'] < 16000) &\n                                (Broadband_Stats['Change_Download'] > 8000)]\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Improved Speed (Kbps)\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 1343421
+    },
+    {
+      "raw": "ImprovedCountries_B = Broadband_Stats[(Broadband_Stats['Change_Download'] < 60000) &\n                                (Broadband_Stats['Change_Download'] > 16000)]\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Improved Speed (Kbps)\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 1203820
+    },
+    {
+      "raw": "ImprovedCountries_B = Broadband_Stats[(Broadband_Stats['Change_Download'] >= 60000)]\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Improved Speed (Kbps)\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 980296
+    },
+    {
+      "raw": "#DeterioratedSpeeds = Mobile_Stats[(Mobile_Stats['Change_Download'] < 0 )]\n#px.bar(DeterioratedSpeeds,y='Change_Download',labels={'Name':'Country','Change_Download':'Improved Download Speed'},title='Decreasing Countries\\' download speeds')\nImprovedCountries_B = Broadband_Stats[(Broadband_Stats['Change_Download'] < 0)]\nCountries = ImprovedCountries_B.index\n\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Improved Speed (Kbps)\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 1096016
+    },
+    {
+      "raw": "Mobile_Stats.sort_values(by=['Change_Download'])",
+      "total-ns": 784431
+    },
+    {
+      "raw": "Broadband_Stats.sort_values(by=['Change_Download'])",
+      "total-ns": 588842
+    },
+    {
+      "raw": "Mobile_Stats_relative = Mobile_df.groupby('Name').agg(\n    Change_Download=('Avg. Avg D Kbps', lambda x: (list(x)[-1] - list(x)[0])/list(x)[0]),\n    Change_Upload=('Avg. Avg U Kbps', lambda x: (list(x)[-1] - list(x)[0])/list(x)[0]),\n    Change_Latency=('Avg Lat Ms', lambda x: (list(x)[-1] - list(x)[0])/list(x)[0])\n)\nBroadband_Stats_relative = Broadband_df.groupby('Name').agg(\n    Change_Download=('Avg. Avg D Kbps', lambda x: (list(x)[-1] - list(x)[0])/list(x)[0]),\n    Change_Upload=('Avg. Avg U Kbps', lambda x: (list(x)[-1] - list(x)[0])/list(x)[0]),\n    Change_Latency=('Avg Lat Ms', lambda x: (list(x)[-1] - list(x)[0])/list(x)[0])\n)",
+      "total-ns": 14494405733
+    },
+    {
+      "raw": "ImprovedCountries_B = Broadband_Stats_relative[(Broadband_Stats_relative['Change_Download'] >= 2)]\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats_relative.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Relative Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Relative Improvement of Speed\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 961575
+    },
+    {
+      "raw": "ImprovedCountries_B = Broadband_Stats_relative[(Broadband_Stats_relative['Change_Download'] >= 1) & (Broadband_Stats_relative['Change_Download'] < 2)]\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats_relative.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Relative Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Relative Improvement of Speed\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 776109
+    },
+    {
+      "raw": "ImprovedCountries_B = Broadband_Stats_relative[(Broadband_Stats_relative['Change_Download'] >= 0.5) & (Broadband_Stats_relative['Change_Download'] < 1)]\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats_relative.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Relative Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Relative Improvement of Speed\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 709905
+    },
+    {
+      "raw": "ImprovedCountries_B = Broadband_Stats_relative[(Broadband_Stats_relative['Change_Download'] >= 0.2) & (Broadband_Stats_relative['Change_Download'] < 0.5)]\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats_relative.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Relative Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Relative Improvement of Speed\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 1004262
+    },
+    {
+      "raw": "ImprovedCountries_B = Broadband_Stats_relative[(Broadband_Stats_relative['Change_Download'] >= 0) & (Broadband_Stats_relative['Change_Download'] < 0.2)]\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats_relative.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Relative Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Relative Improvement of Speed\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 899623
+    },
+    {
+      "raw": "ImprovedCountries_B = Broadband_Stats_relative[(Broadband_Stats_relative['Change_Download'] < 0)]\n# STEFANOS: Disable plotting\n# fig = go.Figure()\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=ImprovedCountries_B['Change_Download'],opacity=0.6,name='Broadband'))\n# fig.add_trace(go.Bar(x=ImprovedCountries_B.index,y=Mobile_Stats_relative.query(\"index in @ImprovedCountries_B.index\")['Change_Download'],opacity=0.6,name='Mobile'))\n# fig.update_layout(barmode='group',\n#                   title='Bar Chart of Relative Speed change',\n#                   xaxis_title=\"Country\", yaxis_title=\"Relative Improvement of Speed\",\n#                   legend_title='Color')\n# fig.show()",
+      "total-ns": 611017
+    },
+    {
+      "raw": "Broadband_Stats_relative.sort_values(by=['Change_Download'])",
+      "total-ns": 567765
+    },
+    {
+      "raw": "Mobile_Stats_relative.sort_values(by=['Change_Download'])",
+      "total-ns": 668486
+    }
+  ]
+}
