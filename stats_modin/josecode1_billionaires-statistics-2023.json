@@ -2,75 +2,75 @@
   "cells": [
     {
       "raw": "# This Python 3 environment comes with many helpful analytics libraries installed\n# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python\n# For example, here's several helpful packages to load\n\nimport numpy as np # linear algebra\nimport pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\nimport seaborn as sns \nimport matplotlib.pyplot as plt\n\n# Input data files are available in the read-only \"../input/\" directory\n# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory\n\nimport os\nfor dirname, _, filenames in os.walk('/kaggle/input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))\n\n# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using \"Save & Run All\" \n# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session",
-      "total-ns": 2504629374
+      "total-ns": 2564156381
     },
     {
       "raw": "data = pd.read_csv(\"../input/Billionaires Statistics Dataset.csv\", index_col=\"rank\")",
-      "total-ns": 21692606
+      "total-ns": 18928817
     },
     {
       "raw": "data.head(5)",
-      "total-ns": 500832
+      "total-ns": 459657
     },
     {
       "raw": "data.describe()",
-      "total-ns": 20422442
+      "total-ns": 18780711
     },
     {
       "raw": "country_names =data[\"country\"].value_counts() #List of how many billionaires there are in the country",
-      "total-ns": 850609
+      "total-ns": 810050
     },
     {
       "raw": "country_names ",
-      "total-ns": 219152
+      "total-ns": 220521
     },
     {
       "raw": "data_100 = data.loc[:100,[\"finalWorth\",\"category\",\"country\"]]\n",
-      "total-ns": 985178
+      "total-ns": 1065343
     },
     {
       "raw": "data_100_category = data_100[\"category\"].value_counts()",
-      "total-ns": 544709
+      "total-ns": 536186
     },
     {
       "raw": "data_usa = data[data[\"country\"]== \"United States\"] #We focus on billionaires based in United States\n",
-      "total-ns": 889101
+      "total-ns": 884516
     },
     {
       "raw": "data_usa_category = data_usa[\"category\"].value_counts()\ndata_usa_category",
-      "total-ns": 724905
+      "total-ns": 520730
     },
     {
       "raw": "data_usa_city = data_usa[\"city\"].value_counts()\nprint(data_usa_city)\ndata_usa_city.info()",
-      "total-ns": 3638118
+      "total-ns": 3901247
     },
     {
       "raw": "data.head(5)",
-      "total-ns": 303889
+      "total-ns": 384984
     },
     {
       "raw": "category_list = list(data.category.unique())\ncategory_list",
-      "total-ns": 490933
+      "total-ns": 560056
     },
     {
       "raw": "data.finalWorth = data.finalWorth.astype(float)\nworth_average = []\nfor i in category_list:\n    x = data[data['category']==i]\n    worth_ratio = sum(x.finalWorth)/len(x)\n    worth_average.append(worth_ratio)\ndata2 = pd.DataFrame({'category_list': category_list,'worth_average':worth_average})\nnew_index = (data2['worth_average'].sort_values(ascending=False)).index.values\nnew_data = data2.reindex(new_index)",
-      "total-ns": 14586908
+      "total-ns": 10542597
     },
     {
       "raw": "data3 =data.dropna(axis=\"index\",how=\"any\",inplace=False) # \u0131 created new df because so many nan values was exist",
-      "total-ns": 6665826
+      "total-ns": 5078506
     },
     {
       "raw": "data3.head() ",
-      "total-ns": 354382
+      "total-ns": 355220
     },
     {
       "raw": "data3.info() #in the new df we have 238 rows for each column",
-      "total-ns": 5000615
+      "total-ns": 5298124
     },
     {
       "raw": "data3.country.unique()  # and 238 billionaires in usa, others deleted.",
-      "total-ns": 358144
+      "total-ns": 361242
     }
   ]
 }
