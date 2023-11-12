@@ -117,6 +117,11 @@ _IREWR_times_file = _IREWR_run_config['output_times_json']
 _IREWR_measure_modin_mem = _IREWR_run_config['measure_modin_mem']
 _IREWR_measure_data = _IREWR_run_config['measure_data']
 
+if _IREWR_measure_data:
+  import pandas as pd
+  import modin.pandas as mpd
+
+
 def _IREWR_err_txt(ctx):
   return \
 f"""
@@ -152,26 +157,40 @@ for _IREWR_cell_idx, _IREWR_cell in enumerate(_IREWR_source_cells):
   _IREWR_cell_stats['raw'] = _IREWR_cell
   _IREWR_cell_stats['total-ns'] = _IREWR_diff_in_ns
   if _IREWR_measure_data:
-    import pandas as pd
     str_data = {}
+    p2m_data = {}
+    m2p_data = {}
     for k in list(_IREWR_ipython.user_ns.keys()):
-      # str_data = str(k)
       if (type(_IREWR_ipython.user_ns[k]) == pd.DataFrame) or (type(_IREWR_ipython.user_ns[k]) == pd.Series):
-        # str_data += (k + ":" + str(sys.getsizeof(_IREWR_ipython.user_ns[k])) + "|")
-        df_o = _IREWR_ipython.user_ns[k]
-        str_data[k] = str(df_o.memory_usage(index=True, deep=True).sum())
-        # str_data += (k + ":" + str(_IREWR_ipython.user_ns[k].memory_usage(index=True, deep=True).sum()) + "|")
-  #     # if modin_has_been_imported:
-  #     #   # import modin as mpd
-  #     #   _IREWR_m2p_start = time.perf_counter_ns()
-  #     #   # df_o = df_o.to_pandas()
-  #     #   _IREWR_m2p_end = time.perf_counter_ns()
-  #     #   _IREWR_m2p_diff_in_ns = _IREWR_m2p_end - _IREWR_m2p_start
-  #     #   _IREWR_p2m_start = time.perf_counter_ns()
-  #     #   # df_o = mpd.from_pandas(df_o)
-  #     #   _IREWR_p2m_end = time.perf_counter_ns()
-  #     #   _IREWR_p2m_diff_in_ns = _IREWR_p2m_end - _IREWR_p2m_start
+        str_data[k] = _IREWR_ipython.user_ns[k].memory_usage(index=True, deep=True).sum()
+      modin_has_been_imported = "modin.pandas" in sys.modules
+      if modin_has_been_imported:
+        if isinstance(_IREWR_ipython.user_ns[k], mpd.DataFrame):
+          _IREWR_m2p_start = time.perf_counter_ns()
+          _IREWR_ipython.user_ns[k] = _IREWR_ipython.user_ns[k]._to_pandas()
+          _IREWR_m2p_end = time.perf_counter_ns()
+          _IREWR_m2p_diff_in_ns = _IREWR_m2p_end - _IREWR_m2p_start
+          _IREWR_p2m_start = time.perf_counter_ns()
+          _IREWR_ipython.user_ns[k] = mpd.DataFrame(_IREWR_ipython.user_ns[k])
+          _IREWR_p2m_end = time.perf_counter_ns()
+          _IREWR_p2m_diff_in_ns = _IREWR_p2m_end - _IREWR_p2m_start
+          p2m_data[k] = _IREWR_p2m_diff_in_ns
+          m2p_data[k] = _IREWR_m2p_diff_in_ns
+        elif isinstance(_IREWR_ipython.user_ns[k], mpd.Series):
+          _IREWR_m2p_start = time.perf_counter_ns()
+          _IREWR_ipython.user_ns[k] = _IREWR_ipython.user_ns[k]._to_pandas()
+          _IREWR_m2p_end = time.perf_counter_ns()
+          _IREWR_m2p_diff_in_ns = _IREWR_m2p_end - _IREWR_m2p_start
+          _IREWR_p2m_start = time.perf_counter_ns()
+          _IREWR_ipython.user_ns[k] = mpd.Series(_IREWR_ipython.user_ns[k])
+          _IREWR_p2m_end = time.perf_counter_ns()
+          _IREWR_p2m_diff_in_ns = _IREWR_p2m_end - _IREWR_p2m_start
+          p2m_data[k] = _IREWR_p2m_diff_in_ns
+          m2p_data[k] = _IREWR_m2p_diff_in_ns
+
     _IREWR_cell_stats['vars'] = str_data
+    _IREWR_cell_stats['p2m'] = p2m_data
+    _IREWR_cell_stats['m2p'] = m2p_data
   
   if not _IREWR_ip_run_res.success:
     _IREWR_ctx = (_IREWR_cell_idx, _IREWR_cell)
