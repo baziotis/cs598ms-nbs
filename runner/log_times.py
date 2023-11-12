@@ -118,8 +118,8 @@ _IREWR_measure_modin_mem = _IREWR_run_config['measure_modin_mem']
 _IREWR_measure_data = _IREWR_run_config['measure_data']
 
 if _IREWR_measure_data:
-  import pandas as pd
-  import modin.pandas as mpd
+  import pandas as pd_xyz
+  import modin.pandas as mpd_xyz
 
 
 def _IREWR_err_txt(ctx):
@@ -161,12 +161,12 @@ for _IREWR_cell_idx, _IREWR_cell in enumerate(_IREWR_source_cells):
     p2m_data = {}
     m2p_data = {}
     for k in list(_IREWR_ipython.user_ns.keys()):
-      if (type(_IREWR_ipython.user_ns[k]) == pd.DataFrame) or (type(_IREWR_ipython.user_ns[k]) == pd.Series):
+      if (type(_IREWR_ipython.user_ns[k]) == pd_xyz.DataFrame) or (type(_IREWR_ipython.user_ns[k]) == pd_xyz.Series):
         # str_data[k] = _IREWR_ipython.user_ns[k].memory_usage(index=True, deep=True).sum()
         str_data[k] = sys.getsizeof(_IREWR_ipython.user_ns[k])
       modin_has_been_imported = "modin.pandas" in sys.modules
       if modin_has_been_imported:
-        if isinstance(_IREWR_ipython.user_ns[k], mpd.DataFrame):
+        if isinstance(_IREWR_ipython.user_ns[k], mpd_xyz.DataFrame):
           _IREWR_m2p_start = time.perf_counter_ns()
           _IREWR_ipython.user_ns[k] = _IREWR_ipython.user_ns[k]._to_pandas()
           _IREWR_m2p_end = time.perf_counter_ns()
@@ -177,7 +177,7 @@ for _IREWR_cell_idx, _IREWR_cell in enumerate(_IREWR_source_cells):
           _IREWR_p2m_diff_in_ns = _IREWR_p2m_end - _IREWR_p2m_start
           p2m_data[k] = _IREWR_p2m_diff_in_ns
           m2p_data[k] = _IREWR_m2p_diff_in_ns
-        elif isinstance(_IREWR_ipython.user_ns[k], mpd.Series):
+        elif isinstance(_IREWR_ipython.user_ns[k], mpd_xyz.Series):
           _IREWR_m2p_start = time.perf_counter_ns()
           _IREWR_ipython.user_ns[k] = _IREWR_ipython.user_ns[k]._to_pandas()
           _IREWR_m2p_end = time.perf_counter_ns()
