@@ -162,7 +162,8 @@ for _IREWR_cell_idx, _IREWR_cell in enumerate(_IREWR_source_cells):
     m2p_data = {}
     for k in list(_IREWR_ipython.user_ns.keys()):
       if (type(_IREWR_ipython.user_ns[k]) == pd.DataFrame) or (type(_IREWR_ipython.user_ns[k]) == pd.Series):
-        str_data[k] = _IREWR_ipython.user_ns[k].memory_usage(index=True, deep=True).sum()
+        # str_data[k] = _IREWR_ipython.user_ns[k].memory_usage(index=True, deep=True).sum()
+        str_data[k] = sys.getsizeof(_IREWR_ipython.user_ns[k])
       modin_has_been_imported = "modin.pandas" in sys.modules
       if modin_has_been_imported:
         if isinstance(_IREWR_ipython.user_ns[k], mpd.DataFrame):
