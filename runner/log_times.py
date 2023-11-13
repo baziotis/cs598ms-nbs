@@ -92,23 +92,22 @@ import re
 
 _IREWR_ipython = get_ipython()
 if _IREWR_ipython is None:
-  print("[ERROR]: Run with `ipython` not `python`")
-  sys.exit(1)
+    print("[ERROR]: Run with `ipython` not `python`")
+    sys.exit(1)
 assert isinstance(_IREWR_ipython, InteractiveShell)
-
 
 _IREWR_run_config_filename = sys.argv[1]
 
 _IREWR_f = open(_IREWR_run_config_filename)
 try:
-  _IREWR_run_config = json.load(_IREWR_f)
+    _IREWR_run_config = json.load(_IREWR_f)
 except:
-  _IREWR_f.close()
-  sys.exit(1)
+    _IREWR_f.close()
+    sys.exit(1)
 _IREWR_f.close()
 
 if _IREWR_run_config['less_replication']:
-  os.environ["IREWR_LESS_REPLICATION"] = "True"
+    os.environ["IREWR_LESS_REPLICATION"] = "True"
 
 import bench_utils
 
@@ -118,13 +117,13 @@ _IREWR_measure_modin_mem = _IREWR_run_config['measure_modin_mem']
 _IREWR_measure_data = _IREWR_run_config['measure_data']
 
 if _IREWR_measure_data:
-  import pandas as pd_xyz
-  import modin.pandas as mpd_xyz
+    import pandas as pd_xyz
+    import modin.pandas as mpd_xyz
 
 
 def _IREWR_err_txt(ctx):
-  return \
-f"""
+    return \
+        f"""
 [START ERROR]
 # Source cell idx: {ctx[0]}
 # Source code:
@@ -132,99 +131,114 @@ f"""
 [END ERROR]
 """
 
+
 _IREWR_ipython.run_line_magic('cd', _IREWR_run_config['src_dir'])
 
 _IREWR_source_cells = _IREWR_run_config['cells']
 
+
 def report_on_fail(_IREWR_ctx):
-  global _IREWR_error_file
-  bench_utils.write_to_file(_IREWR_error_file, _IREWR_err_txt(_IREWR_ctx))
-  sys.exit(1)
+    global _IREWR_error_file
+    bench_utils.write_to_file(_IREWR_error_file, _IREWR_err_txt(_IREWR_ctx))
+    sys.exit(1)
+
 
 _IREWR_cells = []
 _IREWR_max_modin_mem = 0
 _IREWR_max_modin_disk = 0
 for _IREWR_cell_idx, _IREWR_cell in enumerate(_IREWR_source_cells):
 
-  # This will not catch all failures. The caller has to check the stdout
-  # of this script.
-  _IREWR_ip_run_res = None
-  _IREWR_start = time.perf_counter_ns()
-  _IREWR_ip_run_res = _IREWR_ipython.run_cell(_IREWR_cell, silent=True)
-  _IREWR_end = time.perf_counter_ns()
-  _IREWR_diff_in_ns = _IREWR_end - _IREWR_start
-  _IREWR_cell_stats = dict()
-  _IREWR_cell_stats['raw'] = _IREWR_cell
-  _IREWR_cell_stats['total-ns'] = _IREWR_diff_in_ns
-  if _IREWR_measure_data:
-    str_data = {}
-    p2m_data = {}
-    m2p_data = {}
-    for k in list(_IREWR_ipython.user_ns.keys()):
-      if (type(_IREWR_ipython.user_ns[k]) == pd_xyz.DataFrame) or (type(_IREWR_ipython.user_ns[k]) == pd_xyz.Series):
-        # str_data[k] = _IREWR_ipython.user_ns[k].memory_usage(index=True, deep=True).sum()
-        str_data[k] = sys.getsizeof(_IREWR_ipython.user_ns[k])
-      modin_has_been_imported = "modin.pandas" in sys.modules
-      if modin_has_been_imported:
-        if isinstance(_IREWR_ipython.user_ns[k], mpd_xyz.DataFrame):
-          _IREWR_m2p_start = time.perf_counter_ns()
-          _IREWR_ipython.user_ns[k] = _IREWR_ipython.user_ns[k]._to_pandas()
-          _IREWR_m2p_end = time.perf_counter_ns()
-          _IREWR_m2p_diff_in_ns = _IREWR_m2p_end - _IREWR_m2p_start
-          _IREWR_p2m_start = time.perf_counter_ns()
-          _IREWR_ipython.user_ns[k] = mpd.DataFrame(_IREWR_ipython.user_ns[k])
-          _IREWR_p2m_end = time.perf_counter_ns()
-          _IREWR_p2m_diff_in_ns = _IREWR_p2m_end - _IREWR_p2m_start
-          p2m_data[k] = _IREWR_p2m_diff_in_ns
-          m2p_data[k] = _IREWR_m2p_diff_in_ns
-        elif isinstance(_IREWR_ipython.user_ns[k], mpd_xyz.Series):
-          _IREWR_m2p_start = time.perf_counter_ns()
-          _IREWR_ipython.user_ns[k] = _IREWR_ipython.user_ns[k]._to_pandas()
-          _IREWR_m2p_end = time.perf_counter_ns()
-          _IREWR_m2p_diff_in_ns = _IREWR_m2p_end - _IREWR_m2p_start
-          _IREWR_p2m_start = time.perf_counter_ns()
-          _IREWR_ipython.user_ns[k] = mpd.Series(_IREWR_ipython.user_ns[k])
-          _IREWR_p2m_end = time.perf_counter_ns()
-          _IREWR_p2m_diff_in_ns = _IREWR_p2m_end - _IREWR_p2m_start
-          p2m_data[k] = _IREWR_p2m_diff_in_ns
-          m2p_data[k] = _IREWR_m2p_diff_in_ns
+    # This will not catch all failures. The caller has to check the stdout
+    # of this script.
+    _IREWR_ip_run_res = None
+    _IREWR_start = time.perf_counter_ns()
+    _IREWR_ip_run_res = _IREWR_ipython.run_cell(_IREWR_cell, silent=True)
+    _IREWR_end = time.perf_counter_ns()
+    _IREWR_diff_in_ns = _IREWR_end - _IREWR_start
+    _IREWR_cell_stats = dict()
+    _IREWR_cell_stats['raw'] = _IREWR_cell
+    _IREWR_cell_stats['total-ns'] = _IREWR_diff_in_ns
+    # Collect data for the ML model (1. the df/series variables and their sizes,
+    # 2. their modin2pandas conversion times + vice versa)
+    if _IREWR_measure_data:
+        # Dictionaries to hold the results
+        _IREWR_str_data = {}
+        _IREWR_p2m_data = {}
+        _IREWR_m2p_data = {}
+        # Iterate through variables and check if they are df or series
+        for _IREWR_k in list(_IREWR_ipython.user_ns.keys()):
+            if (type(_IREWR_ipython.user_ns[_IREWR_k]) == pd_xyz.DataFrame) or (
+                    type(_IREWR_ipython.user_ns[_IREWR_k]) == pd_xyz.Series):
+                # Get the size of variables
+                _IREWR_str_data[_IREWR_k] = sys.getsizeof(_IREWR_ipython.user_ns[_IREWR_k])
+            # Collect modin conversion times if running modin
+            modin_has_been_imported = "modin.pandas" in sys.modules
+            # Check if modin is running
+            if modin_has_been_imported:
+                # If dataframe, else a series
+                if isinstance(_IREWR_ipython.user_ns[_IREWR_k], mpd_xyz.DataFrame):
+                    # Get the conversion time to pandas
+                    _IREWR_m2p_start = time.perf_counter_ns()
+                    _IREWR_ipython.user_ns[_IREWR_k] = _IREWR_ipython.user_ns[_IREWR_k]._to_pandas()
+                    _IREWR_m2p_end = time.perf_counter_ns()
+                    _IREWR_m2p_diff_in_ns = _IREWR_m2p_end - _IREWR_m2p_start
+                    # Get the conversion time to modin
+                    _IREWR_p2m_start = time.perf_counter_ns()
+                    _IREWR_ipython.user_ns[_IREWR_k] = mpd_xyz.DataFrame(_IREWR_ipython.user_ns[_IREWR_k])
+                    _IREWR_p2m_end = time.perf_counter_ns()
+                    _IREWR_p2m_diff_in_ns = _IREWR_p2m_end - _IREWR_p2m_start
+                    # Assign to dictionary
+                    _IREWR_p2m_data[_IREWR_k] = _IREWR_p2m_diff_in_ns
+                    _IREWR_m2p_data[_IREWR_k] = _IREWR_m2p_diff_in_ns
+                elif isinstance(_IREWR_ipython.user_ns[_IREWR_k], mpd_xyz.Series):
+                    # Get the conversion time to pandas
+                    _IREWR_m2p_start = time.perf_counter_ns()
+                    _IREWR_ipython.user_ns[_IREWR_k] = _IREWR_ipython.user_ns[_IREWR_k]._to_pandas()
+                    _IREWR_m2p_end = time.perf_counter_ns()
+                    _IREWR_m2p_diff_in_ns = _IREWR_m2p_end - _IREWR_m2p_start
+                    # Get the conversion time to modin
+                    _IREWR_p2m_start = time.perf_counter_ns()
+                    _IREWR_ipython.user_ns[_IREWR_k] = mpd_xyz.Series(_IREWR_ipython.user_ns[_IREWR_k])
+                    _IREWR_p2m_end = time.perf_counter_ns()
+                    _IREWR_p2m_diff_in_ns = _IREWR_p2m_end - _IREWR_p2m_start
+                    # Assign to dictionary
+                    _IREWR_p2m_data[_IREWR_k] = _IREWR_p2m_diff_in_ns
+                    _IREWR_m2p_data[_IREWR_k] = _IREWR_m2p_diff_in_ns
+        # Assign to print
+        _IREWR_cell_stats['vars'] = _IREWR_str_data
+        _IREWR_cell_stats['p2m'] = _IREWR_p2m_data
+        _IREWR_cell_stats['m2p'] = _IREWR_m2p_data
 
-    _IREWR_cell_stats['vars'] = str_data
-    _IREWR_cell_stats['p2m'] = p2m_data
-    _IREWR_cell_stats['m2p'] = m2p_data
-  
-  if not _IREWR_ip_run_res.success:
-    _IREWR_ctx = (_IREWR_cell_idx, _IREWR_cell)
-    report_on_fail(_IREWR_ctx)
+    if not _IREWR_ip_run_res.success:
+        _IREWR_ctx = (_IREWR_cell_idx, _IREWR_cell)
+        report_on_fail(_IREWR_ctx)
 
-  modin_has_been_imported = "modin.pandas" in sys.modules
-  if _IREWR_measure_modin_mem and modin_has_been_imported:
-    ray_sample = subprocess.run(["ray", "memory", "--stats-only"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    assert ray_sample.returncode == 0
-    ray_sample_out = ray_sample.stdout.decode()
-    match_mem = re.search("Objects consumed by Ray tasks: (\d+) MiB", ray_sample_out)
-    # Some files will contain nothing.
-    if match_mem:
-      _IREWR_max_modin_mem = max(_IREWR_max_modin_mem, int(match_mem.group(1)))
-    
-    match_disk = re.search("Spilled (\d+) MiB", ray_sample_out)
-    if match_disk:
-      _IREWR_max_modin_disk = max(_IREWR_max_modin_disk, match_disk.group(1))
-  # END if _IREWR_measure_modin_mem #
+    modin_has_been_imported = "modin.pandas" in sys.modules
+    if _IREWR_measure_modin_mem and modin_has_been_imported:
+        ray_sample = subprocess.run(["ray", "memory", "--stats-only"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        assert ray_sample.returncode == 0
+        ray_sample_out = ray_sample.stdout.decode()
+        match_mem = re.search("Objects consumed by Ray tasks: (\d+) MiB", ray_sample_out)
+        # Some files will contain nothing.
+        if match_mem:
+            _IREWR_max_modin_mem = max(_IREWR_max_modin_mem, int(match_mem.group(1)))
 
-  _IREWR_cells.append(_IREWR_cell_stats)
-  
+        match_disk = re.search("Spilled (\d+) MiB", ray_sample_out)
+        if match_disk:
+            _IREWR_max_modin_disk = max(_IREWR_max_modin_disk, match_disk.group(1))
+    # END if _IREWR_measure_modin_mem #
 
+    _IREWR_cells.append(_IREWR_cell_stats)
 
 _IREWR_f = open(_IREWR_times_file, 'w')
 _IREWR_json_d = dict()
 if _IREWR_measure_modin_mem:
-  _IREWR_json_d['max-mem-in-mb'] = _IREWR_max_modin_mem
-  _IREWR_json_d['max-disk-in-mb'] = _IREWR_max_modin_disk
+    _IREWR_json_d['max-mem-in-mb'] = _IREWR_max_modin_mem
+    _IREWR_json_d['max-disk-in-mb'] = _IREWR_max_modin_disk
 else:
-  # Signify that _IREWR_measure_modin_mem should NOT be true
-  # for time measurements. Only output times if it's not
-  # enabled.
-  _IREWR_json_d['cells'] = _IREWR_cells
+    # Signify that _IREWR_measure_modin_mem should NOT be true
+    # for time measurements. Only output times if it's not
+    # enabled.
+    _IREWR_json_d['cells'] = _IREWR_cells
 json.dump(_IREWR_json_d, _IREWR_f, indent=2)
 _IREWR_f.close()
