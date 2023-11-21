@@ -241,6 +241,7 @@ def run_nb_file(nb_path, args):
     config['less_replication'] = args.less_replication
     config['measure_modin_mem'] = args.measure_mem and args.alt == "modin"
     config['measure_data'] = args.measure_data
+    config['dataset_size'] = args.dataset_size
 
     config_filename = 'run_config.json'
     f = open(config_filename, 'w')

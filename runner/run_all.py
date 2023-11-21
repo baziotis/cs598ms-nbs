@@ -12,6 +12,7 @@ parser.add_argument('--cores', type=int, metavar='NUM_CORES', help='Number of co
 parser.add_argument('--less_replication', action='store_true', help='Less replication of data.')
 parser.add_argument('--measure_mem', action='store_true', help='Measure memory consumption (only works for pandas and modin, not koalas).')
 parser.add_argument('--dataset_size', type=int, metavar='DATA_MB', help='Replicate or truncate datasets to a total of the specified size (in MB).')
+parser.add_argument('--measure_data', action='store_true', help='Measure the memory usage and conversion cost.')
 
 args = parser.parse_args()
 
