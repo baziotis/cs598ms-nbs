@@ -62,6 +62,30 @@ You can use the script `copier.sh` that comes with the dataset folder (i.e., `di
 ```bash
 cd <dias-benchmarks root>/runner
 ```
+### Running the ML model 
+Update the parameters in `<dias-benchmarks root>/runner/ml_model/model.py`.
+
+```bash
+....
+# TODO Configurations that you need to set
+# Path to data
+path_to_data = r'/home/damitha/ml_data_sys/data/measure_data_gcp/measure_data'
+# Debug prints
+print_issues = True
+print_speedups = False
+# Add conversion times when creating data for the model
+add_conv_time = True
+.....
+```
+
+Then run the Python file, to get the results of the model.
+
+Note - To run the model all required libraries must be installed in the 
+current Python environment which should be already there if the environment
+setup steps mentioned prior were followed.
+```bash
+python model.py
+```
 
 ### Quiescing the machine (Optional)
 
