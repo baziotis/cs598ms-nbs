@@ -134,6 +134,8 @@ used_data = 0
 skipped_data = 0
 nconsec_spdups = 0
 
+total_conversion_costs = 0
+
 test_pds = []
 
 test_pd_name = []
@@ -213,6 +215,8 @@ def read_data(folder_path_modin, folder_path_pandas, suff):
 
     global empty_inst_pandas
     global empty_inst_modin
+
+    global total_conversion_costs
 
     # Get the list of files in the folder
     file_list = os.listdir(folder_path_modin)
@@ -305,6 +309,7 @@ def read_data(folder_path_modin, folder_path_pandas, suff):
 
                                 if (c_var in conv_time_m2p.keys()):
                                     time_modin_w_conv += conv_time_m2p[c_var] + conv_time_p2m[c_var]
+                                    total_conversion_costs += conv_time_m2p[c_var] + conv_time_p2m[c_var]
                                 else:
                                     if print_issues:
                                         print("Potential issue in", c_var, "of", file_name)
@@ -406,6 +411,10 @@ folder_path_modin_loc = path_to_data + '/1GB/Modin'
 folder_path_pandas_loc = path_to_data + '/1GB/Pandas'
 suff_loc = "1024"
 read_data(folder_path_modin_loc, folder_path_pandas_loc, suff_loc)
+
+print("Total conversion time is: ", total_conversion_costs/1000000000)
+print("Average conversion time is: ", total_conversion_costs / ((len(data_test) + len(data_train))*1000000000))
+print("Average cell time is: ", (sum_time_default + sum_time_default_test) / ((len(data_test) + len(data_train))*1000000000))
 
 all_instrs = list(set(all_instrs))
 

@@ -62,8 +62,8 @@ You can use the script `copier.sh` that comes with the dataset folder (i.e., `di
 ```bash
 cd <dias-benchmarks root>/runner
 ```
-### Running the ML model 
-Update the parameters in `<dias-benchmarks root>/runner/ml_model/model.py`.
+### Running the ML model
+Download (or obtain through running and collecting the data) the dataset (`measure_data_gcp.zip` in the `dataset_size_exp` branch),  and update the parameters in `<dias-benchmarks root>/runner/ml_model/model.py`.
 
 ```bash
 ....
