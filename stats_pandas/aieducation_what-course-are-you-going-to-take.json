@@ -1,0 +1,236 @@
+{
+  "cells": [
+    {
+      "raw": "import os\nimport pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport seaborn as sns",
+      "total-ns": 3390585650
+    },
+    {
+      "raw": "course = pd.read_csv(\"../input/course-reviews-university-of-waterloo/course_data_clean.csv\")",
+      "total-ns": 71900469
+    },
+    {
+      "raw": "factor = 300\ncourse = pd.concat([course]*factor, ignore_index=True)\ncourse.info()",
+      "total-ns": 776562638
+    },
+    {
+      "raw": "course.shape",
+      "total-ns": 416999
+    },
+    {
+      "raw": "course.head(10)",
+      "total-ns": 407034
+    },
+    {
+      "raw": "course.tail(10)",
+      "total-ns": 296497
+    },
+    {
+      "raw": "course.describe()",
+      "total-ns": 386651143
+    },
+    {
+      "raw": "course.info()",
+      "total-ns": 4043793
+    },
+    {
+      "raw": "course = course.dropna()",
+      "total-ns": 4193297093
+    },
+    {
+      "raw": "course[[\"course_unit\", \"course_num\"]] = course[\"course_code\"].str.split(\" \", expand=True)",
+      "total-ns": 6940452117
+    },
+    {
+      "raw": "course",
+      "total-ns": 326493
+    },
+    {
+      "raw": "course[course[\"num_reviews\"] < 10].index",
+      "total-ns": 995589469
+    },
+    {
+      "raw": "course.drop(course[course[\"num_reviews\"] < 10].index, inplace=True)",
+      "total-ns": 1117809676
+    },
+    {
+      "raw": "course",
+      "total-ns": 365612
+    },
+    {
+      "raw": "for i in [\"useful\", \"easy\", \"liked\"]:\n    course[i] = course[i].str.replace(\"%\", \"\")\n    course[i] = course[i].astype(\"int\")",
+      "total-ns": 3899949355
+    },
+    {
+      "raw": "course.set_index(\"course_unit\", inplace=True)",
+      "total-ns": 15085326
+    },
+    {
+      "raw": "course",
+      "total-ns": 355237
+    },
+    {
+      "raw": "course.drop([\"course_title\", \"reviews\", \"course_rating\"], axis=1, inplace=True)",
+      "total-ns": 189339258
+    },
+    {
+      "raw": "course",
+      "total-ns": 326670
+    },
+    {
+      "raw": "course.info()",
+      "total-ns": 3916557
+    },
+    {
+      "raw": "course_gp = course.groupby(\"course_unit\").mean()",
+      "total-ns": 327989960
+    },
+    {
+      "raw": "course_gp",
+      "total-ns": 343925
+    },
+    {
+      "raw": "# STEFANOS-DISABLE-FOR-MODIN: Modin seems to fail in the LHS, giving an error that \"course_rating_mean\" is\n# not in the DF. Of course, it's valid code because we're creating this column here.\n# The problem we cannot just disable this code because follow-up code depends on this column. So, we will create\n# the column before the loop so that indexing in the LHS does not fail.\n\n###### ORIGINAL CODE ###########\n# for i in course_gp.index:\n#     course.loc[i, \"course_rating_mean\"] = course_gp.loc[i, \"course_rating_int\"]\n\n###### CODE THAT MODIN CAN RUN ########\ncourse[\"course_rating_mean\"] = None\nfor i in course_gp.index:\n    course.loc[i, \"course_rating_mean\"] = course_gp.loc[i, \"course_rating_int\"]",
+      "total-ns": 4914557405
+    },
+    {
+      "raw": "course",
+      "total-ns": 299913
+    },
+    {
+      "raw": "course.reset_index(inplace=True)",
+      "total-ns": 127761832
+    },
+    {
+      "raw": "course",
+      "total-ns": 299497
+    },
+    {
+      "raw": "course.groupby(\"course_unit\").mean()[\"course_rating_int\"]",
+      "total-ns": 310054091
+    },
+    {
+      "raw": "course[course[\"course_code\"].str.startswith(\"CS\")].value_counts()",
+      "total-ns": 1430961190
+    },
+    {
+      "raw": "course",
+      "total-ns": 297708
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(25,20))\n# sns.pairplot(data=course)\n# plt.show()",
+      "total-ns": 108170
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(12,10))\n# sns.scatterplot(x=\"num_ratings\", y=\"course_rating_mean\", data=course)\n# plt.show()",
+      "total-ns": 85839
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(12,10))\n# sns.scatterplot(x=\"num_reviews\", y=\"course_rating_mean\", data=course)\n# plt.show()",
+      "total-ns": 79820
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(25,20))\n# sns.scatterplot(x=\"useful\", y=\"course_rating_mean\", hue=\"course_unit\", data=course)\n# plt.xlabel(\"useful\", fontsize = 20)\n# plt.ylabel(\"Course Rating Mean\", fontsize = 20)\n# plt.show()",
+      "total-ns": 88803
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(25,20))\n# sns.scatterplot(x=\"easy\", y=\"course_rating_mean\", hue=\"course_unit\", data=course)\n# plt.xlabel(\"easy\", fontsize = 20)\n# plt.ylabel(\"Course Rating Mean\", fontsize = 20)\n# plt.show()",
+      "total-ns": 88857
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(25,20))\n# sns.scatterplot(x=\"liked\", y=\"course_rating_mean\", hue=\"course_unit\", data=course)\n# plt.xlabel(\"liked\", fontsize = 20)\n# plt.ylabel(\"Course Rating Mean\", fontsize = 20)\n# plt.show()",
+      "total-ns": 84804
+    },
+    {
+      "raw": "course.sort_values(\"course_rating_mean\", ascending=False, inplace=True)\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(25,20))\n# sns.set_palette(\"Pastel1\")\n# sns.barplot(x=\"course_rating_mean\", y=\"course_unit\", data=course)\n# plt.xlabel(\"Course Rating Mean\", fontsize = 20)\n# plt.ylabel(\"Course Unit\", fontsize = 20)\n# plt.show()",
+      "total-ns": 2455234823
+    },
+    {
+      "raw": "course.reset_index(inplace=True)",
+      "total-ns": 5399301
+    },
+    {
+      "raw": "course.set_index(\"course_unit\", inplace=True)",
+      "total-ns": 5530475
+    },
+    {
+      "raw": "course.loc[\"KOREA\", \"course_rating_mean\"].value_counts()",
+      "total-ns": 580677451
+    },
+    {
+      "raw": "KOREA = course.loc[\"KOREA\", :]",
+      "total-ns": 91781310
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(10,10))\n# sns.barplot(x=\"course_code\", y=\"course_rating_mean\", data=KOREA)\n# plt.xlabel(\"KOREA course\", fontsize = 20)\n# plt.ylabel(\"Course Rating Mean\", fontsize = 20)\n# plt.show()",
+      "total-ns": 190396
+    },
+    {
+      "raw": "course.loc[\"CHINA\", \"course_rating_mean\"].value_counts()",
+      "total-ns": 92027274
+    },
+    {
+      "raw": "china = course.loc[\"CHINA\", :]",
+      "total-ns": 93522108
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(10,10))\n# sns.barplot(x=\"course_code\", y=\"course_rating_mean\", data=china)\n# plt.xlabel(\"CHINA course\", fontsize = 20)\n# plt.ylabel(\"Course Rating Mean\", fontsize = 20)\n# plt.show()",
+      "total-ns": 288587
+    },
+    {
+      "raw": "course.loc[\"CHINA\", \"course_rating_mean\"].value_counts()",
+      "total-ns": 102205853
+    },
+    {
+      "raw": "span = course.loc[\"SPAN\", :]\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(10,10))\n# sns.barplot(x=\"course_code\", y=\"course_rating_mean\", data=span)\n# plt.xlabel(\"SPANISH course\", fontsize = 20)\n# plt.ylabel(\"Course Rating Mean\", fontsize = 20)\n# plt.show()",
+      "total-ns": 98770039
+    },
+    {
+      "raw": "course.loc[\"CS\", \"course_rating_mean\"].value_counts()",
+      "total-ns": 164773646
+    },
+    {
+      "raw": "cs = course.loc[\"CS\", :]\ncs",
+      "total-ns": 122092741
+    },
+    {
+      "raw": "cs_mean = cs.groupby(\"course_code\").mean().sort_values(\"course_rating_int\", ascending=False)\ncs_mean",
+      "total-ns": 40471144
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(15,10))\n# sns.barplot(x=\"course_rating_int\", y=cs_mean.index, data=cs_mean)\n# plt.xlabel(\"Course Rating Mean\", fontsize = 20)\n# plt.ylabel(\"CS Course\", fontsize = 20)\n# plt.show()",
+      "total-ns": 169418
+    },
+    {
+      "raw": "course.loc[\"WKRPT\", \"course_rating_mean\"].value_counts()",
+      "total-ns": 130769241
+    },
+    {
+      "raw": "wkrpt = course.loc[\"WKRPT\", :]\nwkrpt",
+      "total-ns": 128159203
+    },
+    {
+      "raw": "wkrpt_mean = wkrpt.groupby(\"course_code\").mean().sort_values(\"course_rating_int\", ascending=False)\nwkrpt_mean",
+      "total-ns": 2897656
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(15,10))\n# sns.barplot(x=\"course_rating_int\", y=wkrpt_mean.index, data=wkrpt_mean)\n# plt.xlabel(\"Course Rating Mean\", fontsize = 20)\n# plt.ylabel(\"WKRPT Course\", fontsize = 20)\n# plt.show()",
+      "total-ns": 255085
+    },
+    {
+      "raw": "course.loc[\"PD\", \"course_rating_mean\"].value_counts()",
+      "total-ns": 132040458
+    },
+    {
+      "raw": "pd = course.loc[\"PD\", :]\npd",
+      "total-ns": 96489131
+    },
+    {
+      "raw": "pd_mean = pd.groupby(\"course_code\").mean().sort_values(\"course_rating_int\", ascending=False)\npd_mean",
+      "total-ns": 12305618
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(15,10))\n# sns.barplot(x=\"course_rating_int\", y=pd_mean.index, data=pd_mean)\n# plt.xlabel(\"Course Rating Mean\", fontsize = 20)\n# plt.ylabel(\"PD Course\", fontsize = 20)\n# plt.show()",
+      "total-ns": 156562
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "cells": [
+    {
+      "raw": "import numpy as np\nimport pandas as pd",
+      "total-ns": 1465013580
+    },
+    {
+      "raw": "df = pd.read_csv('../input/coc_clans_dataset.csv', index_col = 0)",
+      "total-ns": 23368366964
+    },
+    {
+      "raw": "df.head()",
+      "total-ns": 3356141
+    },
+    {
+      "raw": "df.info()",
+      "total-ns": 19392896
+    },
+    {
+      "raw": "missing_count = df['clan_location'].isnull().sum()\n\nnon_missing_count = len(df) - missing_count\n\nlabels = ['Missing Data', 'Non-Missing Data']\nsizes = [missing_count, non_missing_count]",
+      "total-ns": 175732414
+    },
+    {
+      "raw": "df['clan_location'].unique(), df['clan_location'].value_counts()",
+      "total-ns": 472889721
+    },
+    {
+      "raw": "count = (df['clan_location'] == 'T\u00fcrkiye').sum()\ncount",
+      "total-ns": 178420149
+    },
+    {
+      "raw": "df['clan_level'].value_counts()",
+      "total-ns": 43962148
+    },
+    {
+      "raw": "bins = [0, 6, 12, 18, 24, 30, 36]  # Group levels 1-6, 7-12, 13-18, and so on\n\n# Group the clan levels and create a new column to represent the groups\ndf['clan_level_group'] = pd.cut(df['clan_level'], bins=bins, labels=['1-6', '7-12', '13-18', '19-24', '25-30', '31-36'])",
+      "total-ns": 98586499
+    },
+    {
+      "raw": "df['capital_league'].value_counts()",
+      "total-ns": 241105355
+    },
+    {
+      "raw": "df_ranked = df[df['capital_league'] != 'Unranked']",
+      "total-ns": 344901042
+    },
+    {
+      "raw": "df.info()",
+      "total-ns": 4338641
+    },
+    {
+      "raw": "selected_columns = ['clan_level', 'clan_points', 'clan_builder_base_points', 'clan_versus_points',\n                    'required_trophies', 'war_win_streak', 'war_wins', 'war_ties', 'war_losses',\n                    'num_members', 'required_builder_base_trophies','required_versus_trophies', \n                    'required_townhall_level', 'clan_capital_hall_level','clan_capital_points', \n                    'mean_member_level', 'mean_member_trophies',\n                    ]\n\ncorrelation_matrix = df[selected_columns].corr()",
+      "total-ns": 3387205498
+    }
+  ]
+}

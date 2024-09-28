@@ -1,0 +1,112 @@
+{
+  "cells": [
+    {
+      "raw": "\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nimport os\n\nimport os\nos.environ[\"MODIN_ENGINE\"] = \"ray\"\nimport ray\nos.environ['MODIN_CPUS'] = \"4\"\nray.init(num_cpus=4, runtime_env={'env_vars': {'__MODIN_AUTOIMPORT_PANDAS__': '1'}})\nimport modin.pandas as pd\n",
+      "total-ns": 7598289582
+    },
+    {
+      "raw": "data=pd.read_csv(\"../input/superstore/SampleSuperstore.csv\")",
+      "total-ns": 8709090106
+    },
+    {
+      "raw": "factor = 800\ndata = pd.concat([data]*factor)\ndata.info()",
+      "total-ns": 10429046929
+    },
+    {
+      "raw": "data.head()",
+      "total-ns": 14635679
+    },
+    {
+      "raw": "data.info()",
+      "total-ns": 10423389437
+    },
+    {
+      "raw": "data.duplicated().sum()",
+      "total-ns": 11050104617
+    },
+    {
+      "raw": "# STEFANOS: Disable this. It undos the data replication.\n# data.drop_duplicates(inplace= True)",
+      "total-ns": 192846
+    },
+    {
+      "raw": "data.info()",
+      "total-ns": 7179720060
+    },
+    {
+      "raw": "data.drop([\"Postal Code\"], axis=1,inplace= True)",
+      "total-ns": 37515006
+    },
+    {
+      "raw": "data.info()",
+      "total-ns": 9097903254
+    },
+    {
+      "raw": "data.corr()",
+      "total-ns": 2962679780
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.heatmap(data.corr(), annot=True)",
+      "total-ns": 317155
+    },
+    {
+      "raw": "data[\"Ship Mode\"].value_counts()",
+      "total-ns": 3022161034
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.countplot(x= data['Ship Mode'])",
+      "total-ns": 284999
+    },
+    {
+      "raw": "data[\"Segment\"].value_counts()",
+      "total-ns": 2343598260
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.countplot(x= data['Segment'])",
+      "total-ns": 406900
+    },
+    {
+      "raw": "data[\"Category\"].value_counts()",
+      "total-ns": 2497912053
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.countplot(x= data['Category'])",
+      "total-ns": 287764
+    },
+    {
+      "raw": "data[\"Sub-Category\"].value_counts()\n",
+      "total-ns": 1436346265
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(15,15))\n# plt.pie(data[\"Sub-Category\"].value_counts(), labels= data[\"Sub-Category\"].value_counts().index, autopct =\"%2f\")\n# plt.show()",
+      "total-ns": 349019
+    },
+    {
+      "raw": "st_profit=data.groupby([\"State\"])[\"Profit\"].sum().nlargest(20)",
+      "total-ns": 2550913788
+    },
+    {
+      "raw": "st_profit",
+      "total-ns": 300065
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# plt.figure(figsize=(15,8))\n# st_profit.plot.bar()",
+      "total-ns": 112533
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.lineplot(data=data, x=\"Discount\", y= \"Profit\")",
+      "total-ns": 86171
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# data.plot(kind=\"scatter\",x=\"Sales\",y=\"Profit\", c=\"Discount\", colormap=\"Set1\",figsize=(10,10))",
+      "total-ns": 87364
+    },
+    {
+      "raw": "# %%time\ndata1= data.groupby(\"State\")[[\"Sales\",\"Profit\"]].sum().sort_values(by=\"Sales\", ascending=False)\n# STEFANOS: Disable plotting\n# data1[:].plot.bar(color = [\"Green\",\"Red\"], figsize=(20,12))\n# plt.title(\"Profit-Loss and Sales across States\")\n# plt.show()",
+      "total-ns": 3034368113
+    },
+    {
+      "raw": "data1= data.groupby(\"Region\")[[\"Sales\",\"Profit\"]].sum().sort_values(by=\"Sales\", ascending=False)\n# STEFANOS: Disable plotting\n# data1[:].plot.bar(color = [\"Blue\",\"Red\"], figsize=(10,7))\n# plt.title(\"Profit-Loss and Sales across Region\")\n# plt.show()",
+      "total-ns": 2473643514
+    }
+  ]
+}

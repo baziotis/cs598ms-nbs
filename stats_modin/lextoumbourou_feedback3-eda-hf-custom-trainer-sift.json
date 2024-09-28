@@ -1,0 +1,56 @@
+{
+  "cells": [
+    {
+      "raw": "import numpy as np\nimport os\n\nimport os\nos.environ[\"MODIN_ENGINE\"] = \"ray\"\nimport ray\nos.environ['MODIN_CPUS'] = \"4\"\nray.init(num_cpus=4, runtime_env={'env_vars': {'__MODIN_AUTOIMPORT_PANDAS__': '1'}})\nimport modin.pandas as pd\n",
+      "total-ns": 8538864538
+    },
+    {
+      "raw": "train_df = pd.read_csv('../input/feedback-prize-english-language-learning/train.csv')\ntest_df = pd.read_csv('../input/feedback-prize-english-language-learning/test.csv')",
+      "total-ns": 5843385963
+    },
+    {
+      "raw": "factor = 500\nif \"IREWR_LESS_REPLICATION\" in os.environ and os.environ[\"IREWR_LESS_REPLICATION\"] == \"True\":\n    factor = factor//5\ntrain_df = pd.concat([train_df]*factor)\ntest_df = pd.concat([test_df]*factor)\ntrain_df.info()",
+      "total-ns": 5402016748
+    },
+    {
+      "raw": "train_df.head()",
+      "total-ns": 26420026
+    },
+    {
+      "raw": "test_df.head()",
+      "total-ns": 11576538
+    },
+    {
+      "raw": "len(train_df), len(test_df)",
+      "total-ns": 417693
+    },
+    {
+      "raw": "LABEL_COLUMNS = ['cohesion', 'syntax', 'vocabulary', 'phraseology', 'grammar', 'conventions']",
+      "total-ns": 2501049
+    },
+    {
+      "raw": "## ORIGINAL:\n# texts = train_df.sample(frac=1, random_state=420).head(4)\n## TO RUN WITH KOALAS\ntexts = train_df.sample(frac=1.0, random_state=420).head(4)",
+      "total-ns": 5145434019
+    },
+    {
+      "raw": "train_df['total_score'] = train_df[LABEL_COLUMNS].sum(axis=1)\nlowest_df = train_df.sort_values('total_score').head(4)",
+      "total-ns": 581881967257
+    },
+    {
+      "raw": "train_df['total_score'] = train_df[LABEL_COLUMNS].sum(axis=1)\nhighest_df = train_df.sort_values('total_score', ascending=False).head(4)",
+      "total-ns": 352590405615
+    },
+    {
+      "raw": "train_df['word_count'] = train_df.full_text.apply(lambda x: len(x.split()))",
+      "total-ns": 6363888191
+    },
+    {
+      "raw": "train_df['word_count'].mean()",
+      "total-ns": 44856038666
+    },
+    {
+      "raw": "train_df['word_count'].max()",
+      "total-ns": 89811900
+    }
+  ]
+}

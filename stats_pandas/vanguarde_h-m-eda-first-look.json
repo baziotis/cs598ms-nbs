@@ -1,0 +1,148 @@
+{
+  "cells": [
+    {
+      "raw": "import numpy as np\nimport pandas as pd\nimport seaborn as sns\nfrom matplotlib import pyplot as plt\nfrom tqdm.notebook import tqdm",
+      "total-ns": 2966484444
+    },
+    {
+      "raw": "articles = pd.read_csv(\"../input/articles.csv\")\ncustomers = pd.read_csv(\"../input/customers.csv\")\ntransactions = pd.read_csv(\"../input/transactions_train.csv\")",
+      "total-ns": 32563245738
+    },
+    {
+      "raw": "articles.head()",
+      "total-ns": 579516
+    },
+    {
+      "raw": "# f, ax = plt.subplots(figsize=(15, 7))\n# ax = sns.histplot(data=articles, y='index_name', color='orange')\n# ax.set_xlabel('count by index name')\n# ax.set_ylabel('index name')\n# plt.show()",
+      "total-ns": 137973
+    },
+    {
+      "raw": "# f, ax = plt.subplots(figsize=(15, 7))\n# ax = sns.histplot(data=articles, y='garment_group_name', color='orange', hue='index_group_name', multiple=\"stack\")\n# ax.set_xlabel('count by garment group')\n# ax.set_ylabel('garment group')\n# plt.show()",
+      "total-ns": 110705
+    },
+    {
+      "raw": "articles.groupby(['index_group_name', 'index_name']).count()['article_id']",
+      "total-ns": 137482008
+    },
+    {
+      "raw": "pd.options.display.max_rows = None\narticles.groupby(['product_group_name', 'product_type_name']).count()['article_id']",
+      "total-ns": 148958474
+    },
+    {
+      "raw": "for col in articles.columns:\n    if not 'no' in col and not 'code' in col and not 'id' in col:\n        un_n = articles[col].nunique()\n        print(f'n of unique {col}: {un_n}')",
+      "total-ns": 78941340
+    },
+    {
+      "raw": "pd.options.display.max_rows = 50\ncustomers.head()",
+      "total-ns": 530137
+    },
+    {
+      "raw": "customers.shape[0] - customers['customer_id'].nunique()",
+      "total-ns": 601726876
+    },
+    {
+      "raw": "data_postal = customers.groupby('postal_code', as_index=False).count().sort_values('customer_id', ascending=False)\ndata_postal.head()",
+      "total-ns": 1552235318
+    },
+    {
+      "raw": "customers[customers['postal_code']=='2c29ae653a9282cce4151bd87643c907644e09541abc28ae87dea0d1f6603b1c'].head(5)",
+      "total-ns": 94856207
+    },
+    {
+      "raw": "# import seaborn as sns\n# from matplotlib import pyplot as plt\n# sns.set_style(\"darkgrid\")\n# f, ax = plt.subplots(figsize=(10,5))\n# ax = sns.histplot(data=customers, x='age', bins=50, color='orange')\n# ax.set_xlabel('Distribution of the customers age')\n# plt.show()",
+      "total-ns": 231651
+    },
+    {
+      "raw": "# sns.set_style(\"darkgrid\")\n# f, ax = plt.subplots(figsize=(10,5))\n# ax = sns.histplot(data=customers, x='club_member_status', color='orange')\n# ax.set_xlabel('Distribution of club member status')\n# plt.show()",
+      "total-ns": 119022
+    },
+    {
+      "raw": "customers['fashion_news_frequency'].unique()",
+      "total-ns": 56819040
+    },
+    {
+      "raw": "customers.loc[~customers['fashion_news_frequency'].isin(['Regularly', 'Monthly']), 'fashion_news_frequency'] = 'None'\ncustomers['fashion_news_frequency'].unique()",
+      "total-ns": 116611987
+    },
+    {
+      "raw": "pie_data = customers[['customer_id', 'fashion_news_frequency']].groupby('fashion_news_frequency').count()",
+      "total-ns": 257783522
+    },
+    {
+      "raw": "# sns.set_style(\"darkgrid\")\n# f, ax = plt.subplots(figsize=(10,5))\n# # ax = sns.histplot(data=customers, x='fashion_news_frequency', color='orange')\n# # ax = sns.pie(data=customers, x='fashion_news_frequency', color='orange')\n# colors = sns.color_palette('pastel')\n# ax.pie(pie_data.customer_id, labels=pie_data.index, colors = colors)\n# ax.set_facecolor('lightgrey')\n# ax.set_xlabel('Distribution of fashion news frequency')\n# plt.show()",
+      "total-ns": 249856
+    },
+    {
+      "raw": "transactions.head()",
+      "total-ns": 356235
+    },
+    {
+      "raw": "pd.set_option('display.float_format', '{:.4f}'.format)\ntransactions.describe()['price']",
+      "total-ns": 3901740089
+    },
+    {
+      "raw": "transactions.head()",
+      "total-ns": 430149
+    },
+    {
+      "raw": "# sns.set_style(\"darkgrid\")\n# f, ax = plt.subplots(figsize=(10,5))\n# ax = sns.boxplot(data=transactions, x='price', color='orange')\n# ax.set_xlabel('Price outliers')\n# plt.show()",
+      "total-ns": 133615
+    },
+    {
+      "raw": "transactions_byid = transactions.groupby('customer_id').count()",
+      "total-ns": 13125693417
+    },
+    {
+      "raw": "transactions_byid.sort_values(by='price', ascending=False)['price'][:10]",
+      "total-ns": 330810691
+    },
+    {
+      "raw": "articles_for_merge = articles[['article_id', 'prod_name', 'product_type_name', 'product_group_name', 'index_name']]",
+      "total-ns": 5649369
+    },
+    {
+      "raw": "articles_for_merge = transactions[['customer_id', 'article_id', 'price', 't_dat']].merge(articles_for_merge, on='article_id', how='left')",
+      "total-ns": 14177290907
+    },
+    {
+      "raw": "# sns.set_style(\"darkgrid\")\n# f, ax = plt.subplots(figsize=(25,18))\n# ax = sns.boxplot(data=articles_for_merge, x='price', y='product_group_name')\n# ax.set_xlabel('Price outliers', fontsize=22)\n# ax.set_ylabel('Index names', fontsize=22)\n# ax.xaxis.set_tick_params(labelsize=22)\n# ax.yaxis.set_tick_params(labelsize=22)\n\n# plt.show()",
+      "total-ns": 1716740
+    },
+    {
+      "raw": "# sns.set_style(\"darkgrid\")\n# f, ax = plt.subplots(figsize=(25,18))\n_ = articles_for_merge[articles_for_merge['product_group_name'] == 'Accessories']\n# ax = sns.boxplot(data=_, x='price', y='product_type_name')\n# ax.set_xlabel('Price outliers', fontsize=22)\n# ax.set_ylabel('Index names', fontsize=22)\n# ax.xaxis.set_tick_params(labelsize=22)\n# ax.yaxis.set_tick_params(labelsize=22)\n# del _\n\n# plt.show()",
+      "total-ns": 15283131580
+    },
+    {
+      "raw": "articles_index = articles_for_merge[['index_name', 'price']].groupby('index_name').mean()\n# sns.set_style(\"darkgrid\")\n# f, ax = plt.subplots(figsize=(10,5))\n# ax = sns.barplot(x=articles_index.price, y=articles_index.index, color='orange', alpha=0.8)\n# ax.set_xlabel('Price by index')\n# ax.set_ylabel('Index')\n# plt.show()",
+      "total-ns": 2633206367
+    },
+    {
+      "raw": "articles_index = articles_for_merge[['product_group_name', 'price']].groupby('product_group_name').mean()\n# sns.set_style(\"darkgrid\")\n# f, ax = plt.subplots(figsize=(10,5))\n# ax = sns.barplot(x=articles_index.price, y=articles_index.index, color='orange', alpha=0.8)\n# ax.set_xlabel('Price by product group')\n# ax.set_ylabel('Product group')\n# plt.show()",
+      "total-ns": 2604816205
+    },
+    {
+      "raw": "articles_for_merge['t_dat'] = pd.to_datetime(articles_for_merge['t_dat'])",
+      "total-ns": 5199916938
+    },
+    {
+      "raw": "product_list = ['Shoes', 'Garment Full body', 'Bags', 'Garment Lower body', 'Underwear/nightwear']\n# colors = ['cadetblue', 'orange', 'mediumspringgreen', 'tomato', 'lightseagreen']\nk = 0\n# f, ax = plt.subplots(3, 2, figsize=(20, 15))\nfor i in range(3):\n    for j in range(2):\n        try:\n            product = product_list[k]\n            articles_for_merge_product = articles_for_merge[articles_for_merge.product_group_name == product_list[k]]\n            series_mean = articles_for_merge_product[['t_dat', 'price']].groupby(pd.Grouper(key=\"t_dat\", freq='M')).mean().fillna(0)\n            series_std = articles_for_merge_product[['t_dat', 'price']].groupby(pd.Grouper(key=\"t_dat\", freq='M')).std().fillna(0)\n            # ax[i, j].plot(series_mean, linewidth=4, color=colors[k])\n            # ax[i, j].fill_between(series_mean.index, (series_mean.values-2*series_std.values).ravel(), \n            #                  (series_mean.values+2*series_std.values).ravel(), color=colors[k], alpha=.1)\n            # ax[i, j].set_title(f'Mean {product_list[k]} price in time')\n            # ax[i, j].set_xlabel('month')\n            # ax[i, j].set_xlabel(f'{product_list[k]}')\n            k += 1\n        except IndexError:\n            aa = 0\n# plt.show()",
+      "total-ns": 8206873526
+    },
+    {
+      "raw": "import matplotlib.pyplot as plt\nimport matplotlib.image as mpimg",
+      "total-ns": 4381915
+    },
+    {
+      "raw": "max_price_ids = transactions[transactions.t_dat==transactions.t_dat.max()].sort_values('price', ascending=False).iloc[:5][['article_id', 'price']]\nmin_price_ids = transactions[transactions.t_dat==transactions.t_dat.min()].sort_values('price', ascending=True).iloc[:5][['article_id', 'price']]",
+      "total-ns": 5814023326
+    },
+    {
+      "raw": "# f, ax = plt.subplots(1, 5, figsize=(20,10))\ni = 0\nfor _, data in max_price_ids.iterrows():\n    desc = articles[articles['article_id'] == data['article_id']]['detail_desc'].iloc[0]\n    desc_list = desc.split(' ')\n    for j, elem in enumerate(desc_list):\n        if j > 0 and j % 5 == 0:\n            desc_list[j] = desc_list[j] + '\\n'\n    desc = ' '.join(desc_list)\n    # img = mpimg.imread(f'../input/h-and-m-personalized-fashion-recommendations/images/0{str(data.article_id)[:2]}/0{int(data.article_id)}.jpg')\n    # ax[i].imshow(img)\n    # ax[i].set_title(f'price: {data.price:.2f}')\n    # ax[i].set_xticks([], [])\n    # ax[i].set_yticks([], [])\n    # ax[i].grid(False)\n    # ax[i].set_xlabel(desc, fontsize=10)\n    i += 1\n# plt.show()",
+      "total-ns": 60140405
+    },
+    {
+      "raw": "# f, ax = plt.subplots(1, 5, figsize=(20,10))\ni = 0\nfor _, data in min_price_ids.iterrows():\n    desc = articles[articles['article_id'] == data['article_id']]['detail_desc'].iloc[0]\n    desc_list = desc.split(' ')\n    for j, elem in enumerate(desc_list):\n        if j > 0 and j % 4 == 0:\n            desc_list[j] = desc_list[j] + '\\n'\n    desc = ' '.join(desc_list)\n    # img = mpimg.imread(f'../input/h-and-m-personalized-fashion-recommendations/images/0{str(data.article_id)[:2]}/0{int(data.article_id)}.jpg')\n    # ax[i].imshow(img)\n    # ax[i].set_title(f'price: {data.price:.4f}')\n    # ax[i].set_xlabel(desc, fontsize=10)\n    # ax[i].set_xticks([], [])\n    # ax[i].set_yticks([], [])\n    # ax[i].grid(False)\n    i += 1\n# plt.axis('off')\n# plt.show()",
+      "total-ns": 6426087
+    }
+  ]
+}

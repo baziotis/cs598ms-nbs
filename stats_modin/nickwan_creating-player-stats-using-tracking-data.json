@@ -1,0 +1,64 @@
+{
+  "cells": [
+    {
+      "raw": "import os\n\nimport os\nos.environ[\"MODIN_ENGINE\"] = \"ray\"\nimport ray\nos.environ['MODIN_CPUS'] = \"4\"\nray.init(num_cpus=4, runtime_env={'env_vars': {'__MODIN_AUTOIMPORT_PANDAS__': '1'}})\nimport modin.pandas as pd\nimport seaborn as sns \nimport matplotlib.pyplot as plt ",
+      "total-ns": 9671992672
+    },
+    {
+      "raw": "data = pd.read_csv('../input/nfl-big-data-bowl-2023/week1.csv')\nscout = pd.read_csv('../input/nfl-big-data-bowl-2023/pffScoutingData.csv')\nplays = pd.read_csv('../input/nfl-big-data-bowl-2023/plays.csv')\nplayers = pd.read_csv('../input/nfl-big-data-bowl-2023/players.csv')\n\n# Let's merge these data into one set \ndata = data.merge(scout, how='left')\ndata.shape",
+      "total-ns": 7417320607
+    },
+    {
+      "raw": "data.info()",
+      "total-ns": 665837089
+    },
+    {
+      "raw": "# get ball snap indicies \n_idxs = (data\n         .loc[data['event']=='ball_snap', \n              'frameId']\n         .index\n         .values)\n\n# to get 500ms of movement after snap, get 5 rows (each row is 100ms of info)\nx = [(_idxs+x).tolist() for x in range(0,6)]\nidxs = [item for sublist in x for item in sublist] #the output x is a list of lists, so this is just to flatten the list\n\n# filter for snap + 500ms of data only using our selected indicies\n_df = data.loc[idxs]",
+      "total-ns": 469702968
+    },
+    {
+      "raw": "gid = 2021090900\npid = 97 \nnid = 25511 \n_df.loc[(_df['gameId']==gid) & (_df['playId']==pid) & (_df['nflId']==nid)]",
+      "total-ns": 644202598
+    },
+    {
+      "raw": "# get line of scrimmage info to compute block/rush depth relative to LOS\n_los = (data\n        .loc[(data['team']=='football') & \n             (data['frameId']==1), \n             ['gameId', 'playId', 'x']]\n        .rename(columns={'x':'los'}))\n\n# merge LOS info back to subsetted data\n_df = _df.merge(_los)",
+      "total-ns": 7067115979
+    },
+    {
+      "raw": "_df.loc[(_df['gameId']==gid) & (_df['playId']==pid) & (_df['nflId']==nid)]",
+      "total-ns": 6232229025
+    },
+    {
+      "raw": "# get difference from LOS for all frames and players \n_df['los_diff'] = _df['x'].sub(_df['los'])\n\n# multiply by -1 for plays going the \"left\" direction \n# this is so pass block is monotonic in the same direction (as well as pass rush)\n_df.loc[_df['playDirection']=='left', 'los_diff'] = _df.loc[_df['playDirection']=='left', 'los_diff'].mul(-1)\n\n# merge onto play info to get possession team (could do this anywhere, i do it here for no real optimal reason)\n_df = plays.loc[:, ['gameId', 'playId', 'possessionTeam']].merge(_df)",
+      "total-ns": 4861488023
+    },
+    {
+      "raw": "_df.loc[(_df['gameId']==gid) & (_df['playId']==pid) & (_df['nflId']==nid)]",
+      "total-ns": 799571534
+    },
+    {
+      "raw": "# indicate if a player is on the possession team (1), the defensive team (0), or neither aka the football (-1)\n_df['posTeam'] = 0\n_df.loc[_df['possessionTeam']==_df['team'], 'posTeam'] = 1 \n_df.loc[_df['team']=='football', 'posTeam'] = -1\n\n# create initial snap speed dataframe (mean of speed and acceleration per player)\nsnap_speed = (_df\n              .loc[:, ['nflId','s','a']]\n              .groupby('nflId', \n                       as_index=False)\n              .mean())",
+      "total-ns": 1027702801
+    },
+    {
+      "raw": "snap_speed.head()",
+      "total-ns": 2973172
+    },
+    {
+      "raw": "# given whether a offense player or defense player, aggregate by maxmimum or minimum LOS difference, respectively. \n# e.g. if o-lineman has more a negative LOS diff, they allow more pass rush penetration \n_off = _df.loc[_df['posTeam']==1, ['gameId', 'playId', 'nflId', 'los_diff']].groupby(['gameId', 'playId', 'nflId'], as_index=False).max()\n_def = _df.loc[_df['posTeam']==0, ['gameId', 'playId', 'nflId', 'los_diff']].groupby(['gameId', 'playId', 'nflId'], as_index=False).min()\nlos_diff = _off.append(_def)\nlos_diff = (los_diff\n            .loc[:, ['nflId', 'los_diff']]\n            .groupby('nflId', \n                     as_index=False)\n            .mean())\n\n# merge LOS diff data back onto snap speed\nsnap_speed = snap_speed.merge(los_diff)\nsnap_speed = snap_speed.rename(columns={'s':'snap_s', 'a':'snap_a', 'los_diff':'snap_los_diff'})\n",
+      "total-ns": 730174915
+    },
+    {
+      "raw": "snap_speed.head()",
+      "total-ns": 11826355
+    },
+    {
+      "raw": "df_plt = players.loc[:, ['nflId', 'officialPosition', 'displayName']].merge(snap_speed)\n# STEFANOS: Disable plotting\n# sns.scatterplot(data=df_plt.loc[df_plt['officialPosition'].isin(['T','G','C','DT','NT','DE'])], x='snap_s', y='snap_los_diff', hue='officialPosition')\n# plt.axhline(0, ls=':', lw=2, c='k')\n# plt.legend(bbox_to_anchor=(1.02,1), loc=2)\n# sns.despine()\n# plt.show()",
+      "total-ns": 25831856
+    },
+    {
+      "raw": "df_plt.loc[(df_plt['officialPosition']=='DE') & (df_plt['snap_los_diff']<0)].sort_values('snap_los_diff')",
+      "total-ns": 138480736
+    }
+  ]
+}

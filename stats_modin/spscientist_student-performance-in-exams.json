@@ -1,0 +1,100 @@
+{
+  "cells": [
+    {
+      "raw": "import numpy as np\nimport os\n\nimport os\nos.environ[\"MODIN_ENGINE\"] = \"ray\"\nimport ray\nos.environ['MODIN_CPUS'] = \"4\"\nray.init(num_cpus=4, runtime_env={'env_vars': {'__MODIN_AUTOIMPORT_PANDAS__': '1'}})\nimport modin.pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt",
+      "total-ns": 8816119139
+    },
+    {
+      "raw": "passmark = 40",
+      "total-ns": 430682
+    },
+    {
+      "raw": "df = pd.read_csv(\"../input/StudentsPerformance.csv\")",
+      "total-ns": 5801989719
+    },
+    {
+      "raw": "factor = 1000\ndf = pd.concat([df]*factor)\ndf.info()",
+      "total-ns": 1394136923
+    },
+    {
+      "raw": "df.head()",
+      "total-ns": 9501638
+    },
+    {
+      "raw": "print (df.shape)",
+      "total-ns": 351121
+    },
+    {
+      "raw": "df.describe()",
+      "total-ns": 516073926
+    },
+    {
+      "raw": "df.isnull().sum()",
+      "total-ns": 48275967
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x=\"math score\", data = df, palette=\"muted\")\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 335218
+    },
+    {
+      "raw": "df['Math_PassStatus'] = np.where(df['math score']<passmark, 'F', 'P')\ndf.Math_PassStatus.value_counts()",
+      "total-ns": 2624483199
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x='parental level of education', data = df, hue='Math_PassStatus', palette='bright')\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 331679
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.countplot(x=\"reading score\", data = df, palette=\"muted\")\n# plt.show()",
+      "total-ns": 199001
+    },
+    {
+      "raw": "df['Reading_PassStatus'] = np.where(df['reading score']<passmark, 'F', 'P')\ndf.Reading_PassStatus.value_counts()",
+      "total-ns": 1060600391
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x='parental level of education', data = df, hue='Reading_PassStatus', palette='bright')\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 288916
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x=\"writing score\", data = df, palette=\"muted\")\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 296444
+    },
+    {
+      "raw": "df['Writing_PassStatus'] = np.where(df['writing score']<passmark, 'F', 'P')\ndf.Writing_PassStatus.value_counts()",
+      "total-ns": 1153362255
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x='parental level of education', data = df, hue='Writing_PassStatus', palette='bright')\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 271984
+    },
+    {
+      "raw": "df['OverAll_PassStatus'] = df.apply(lambda x : 'F' if x['Math_PassStatus'] == 'F' or \n                                    x['Reading_PassStatus'] == 'F' or x['Writing_PassStatus'] == 'F' else 'P', axis =1)\n\ndf.OverAll_PassStatus.value_counts()",
+      "total-ns": 14431053297
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x='parental level of education', data = df, hue='OverAll_PassStatus', palette='bright')\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 309711
+    },
+    {
+      "raw": "df['Total_Marks'] = df['math score']+df['reading score']+df['writing score']\ndf['Percentage'] = df['Total_Marks']/3",
+      "total-ns": 49186351
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x=\"Percentage\", data = df, palette=\"muted\")\n# _ = plt.setp(p.get_xticklabels(), rotation=0) ",
+      "total-ns": 277764
+    },
+    {
+      "raw": "def GetGrade(Percentage, OverAll_PassStatus):\n    if ( OverAll_PassStatus == 'F'):\n        return 'F'    \n    if ( Percentage >= 80 ):\n        return 'A'\n    if ( Percentage >= 70):\n        return 'B'\n    if ( Percentage >= 60):\n        return 'C'\n    if ( Percentage >= 50):\n        return 'D'\n    if ( Percentage >= 40):\n        return 'E'\n    else: \n        return 'F'\n\ndf['Grade'] = df.apply(lambda x : GetGrade(x['Percentage'], x['OverAll_PassStatus']), axis=1)\n\ndf.Grade.value_counts()",
+      "total-ns": 17755033758
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.countplot(x=\"Grade\", data = df, order=['A','B','C','D','E','F'],  palette=\"muted\")\n# plt.show()",
+      "total-ns": 324751
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x='parental level of education', data = df, hue='Grade', palette='bright')\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 181046
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "cells": [
+    {
+      "raw": "\nimport os\nos.environ[\"MODIN_ENGINE\"] = \"ray\"\nimport ray\nos.environ['MODIN_CPUS'] = \"4\"\nray.init(num_cpus=4, runtime_env={'env_vars': {'__MODIN_AUTOIMPORT_PANDAS__': '1'}})\nimport modin.pandas as pd\nimport numpy as np\npd.set_option('display.max_columns', 50)",
+      "total-ns": 5827202519
+    },
+    {
+      "raw": "df = pd.read_csv('../input/cybersecurity_attacks.csv', parse_dates=['Timestamp'], dtype={'Protocol':'category', 'Packet Type':'category', 'Traffic Type':'category', 'Attack Type':'category', 'Attack Signature':'category', 'Action Taken':'category', 'Severity Level':'category', 'Network Segment':'category', 'Log Source':'category'}).drop(columns=['Malware Indicators', 'Alerts/Warnings', 'Proxy Information', 'Firewall Logs', 'IDS/IPS Alerts'])",
+      "total-ns": 6986301432
+    },
+    {
+      "raw": "df.info()",
+      "total-ns": 153948335
+    },
+    {
+      "raw": "df.head()",
+      "total-ns": 1178130
+    },
+    {
+      "raw": "df.describe().T",
+      "total-ns": 25162651
+    },
+    {
+      "raw": "df.resample('M', on='Timestamp')['Attack Type']\n\ndf.resample('Y', on='Timestamp')['Attack Type']",
+      "total-ns": 7185664
+    },
+    {
+      "raw": "data = pd.crosstab(df['Timestamp'], df['Attack Type']).resample('M').count().melt(ignore_index=False)",
+      "total-ns": 741864011
+    },
+    {
+      "raw": "df.groupby(df['Timestamp'].dt.time).agg({'Attack Type':'count'}).nlargest(10, 'Attack Type')",
+      "total-ns": 313696391
+    },
+    {
+      "raw": "df.groupby('Attack Type')['Anomaly Scores'].mean().reset_index()",
+      "total-ns": 69318029
+    },
+    {
+      "raw": "pd.crosstab(df['Geo-location Data'], df['Attack Type']).nlargest(5, columns='DDoS')['DDoS']",
+      "total-ns": 341417729
+    },
+    {
+      "raw": "pd.crosstab(df['Geo-location Data'], df['Attack Type']).nlargest(5, columns='Malware')['Malware']",
+      "total-ns": 336567366
+    },
+    {
+      "raw": "pd.crosstab(df['Geo-location Data'], df['Attack Type']).nlargest(5, columns='Intrusion')['Intrusion']",
+      "total-ns": 356022856
+    }
+  ]
+}

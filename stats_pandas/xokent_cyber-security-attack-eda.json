@@ -1,0 +1,52 @@
+{
+  "cells": [
+    {
+      "raw": "import pandas as pd\nimport numpy as np\npd.set_option('display.max_columns', 50)",
+      "total-ns": 1310602081
+    },
+    {
+      "raw": "df = pd.read_csv('../input/cybersecurity_attacks.csv', parse_dates=['Timestamp'], dtype={'Protocol':'category', 'Packet Type':'category', 'Traffic Type':'category', 'Attack Type':'category', 'Attack Signature':'category', 'Action Taken':'category', 'Severity Level':'category', 'Network Segment':'category', 'Log Source':'category'}).drop(columns=['Malware Indicators', 'Alerts/Warnings', 'Proxy Information', 'Firewall Logs', 'IDS/IPS Alerts'])",
+      "total-ns": 426911400
+    },
+    {
+      "raw": "df.info()",
+      "total-ns": 45498487
+    },
+    {
+      "raw": "df.head()",
+      "total-ns": 611773
+    },
+    {
+      "raw": "df.describe().T",
+      "total-ns": 13601919
+    },
+    {
+      "raw": "df.resample('M', on='Timestamp')['Attack Type']\n\ndf.resample('Y', on='Timestamp')['Attack Type']",
+      "total-ns": 74030077
+    },
+    {
+      "raw": "data = pd.crosstab(df['Timestamp'], df['Attack Type']).resample('M').count().melt(ignore_index=False)",
+      "total-ns": 653941056
+    },
+    {
+      "raw": "df.groupby(df['Timestamp'].dt.time).agg({'Attack Type':'count'}).nlargest(10, 'Attack Type')",
+      "total-ns": 35556385
+    },
+    {
+      "raw": "df.groupby('Attack Type')['Anomaly Scores'].mean().reset_index()",
+      "total-ns": 1400313
+    },
+    {
+      "raw": "pd.crosstab(df['Geo-location Data'], df['Attack Type']).nlargest(5, columns='DDoS')['DDoS']",
+      "total-ns": 311793042
+    },
+    {
+      "raw": "pd.crosstab(df['Geo-location Data'], df['Attack Type']).nlargest(5, columns='Malware')['Malware']",
+      "total-ns": 303289499
+    },
+    {
+      "raw": "pd.crosstab(df['Geo-location Data'], df['Attack Type']).nlargest(5, columns='Intrusion')['Intrusion']",
+      "total-ns": 324367585
+    }
+  ]
+}

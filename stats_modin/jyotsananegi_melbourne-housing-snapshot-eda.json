@@ -1,0 +1,72 @@
+{
+  "cells": [
+    {
+      "raw": "# importing libraries\nimport numpy as np # linear algebra\nimport pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)\nfrom datetime import datetime # datetime processing\n\n# setting path of the dataset\nimport os\nfor dirname, _, filenames in os.walk('../input'):\n    for filename in filenames:\n        print(os.path.join(dirname, filename))\n",
+      "total-ns": 1487895337
+    },
+    {
+      "raw": "melb_house = pd.read_csv(\"../input/melb_data.csv\")\n\n# checking the columns\nmelb_house.head()",
+      "total-ns": 46826580
+    },
+    {
+      "raw": "melb_house.shape",
+      "total-ns": 354755
+    },
+    {
+      "raw": "melb_house.info()",
+      "total-ns": 16652322
+    },
+    {
+      "raw": "# checking for unique entries\n\nunique_val = []\nfor i in melb_house.columns:\n    u = melb_house[i].nunique()\n    unique_val.append(u)\n    \npd.DataFrame({\"No. of unique values\": unique_val}, index=melb_house.columns)",
+      "total-ns": 8914937
+    },
+    {
+      "raw": "# Working dataset\ndataset = melb_house.copy()",
+      "total-ns": 2099480
+    },
+    {
+      "raw": "# Features with missing values\nmiss = dataset.isnull().sum().sort_values(ascending = False).head(5)\nmiss_per = (miss/len(dataset))*100\n\n# Percentage of missing values\npd.DataFrame({'No. missing values': miss, '% of missind data': miss_per.values})",
+      "total-ns": 13255026
+    },
+    {
+      "raw": "dataset['Car'].value_counts()",
+      "total-ns": 773280
+    },
+    {
+      "raw": "# Filling null value\ndataset['Car'].fillna(0, inplace = True)\n\n# confimation after filling the null values\nprint(\"Null values before replacement :\", melb_house['Car'].isnull().sum())\nprint(\"Null values after replacement :\", dataset['Car'].isnull().sum())",
+      "total-ns": 1335164
+    },
+    {
+      "raw": "dataset['CouncilArea'].value_counts()",
+      "total-ns": 1024812
+    },
+    {
+      "raw": "# Filling the null value \ndataset['CouncilArea'].fillna('Unavailable', inplace = True)\n\n\n# confimation after filling the null values\nprint(\"Null values before replacement :\", melb_house['CouncilArea'].isnull().sum())\nprint(\"Null values after replacement :\", dataset['CouncilArea'].isnull().sum())",
+      "total-ns": 2245727
+    },
+    {
+      "raw": "# Filling the null value \ndataset['YearBuilt'].fillna(\"Unknown\", inplace=True)\n\n# confimation after filling the null values\nprint(\"Null values before replacement :\", melb_house['YearBuilt'].isnull().sum())\nprint(\"Null values after replacement :\", dataset['YearBuilt'].isnull().sum())",
+      "total-ns": 3033581
+    },
+    {
+      "raw": "# Filling the null value \ndataset['BuildingArea'].fillna(0, inplace = True)\n\n# confimation after filling the null values\nprint(\"Null values before replacement :\", melb_house['BuildingArea'].isnull().sum())\nprint(\"Null values after replacement :\", dataset['BuildingArea'].isnull().sum())",
+      "total-ns": 1207439
+    },
+    {
+      "raw": "# log transformation of price\ndataset['Price_trans'] = np.log(dataset['Price'])",
+      "total-ns": 1012052
+    },
+    {
+      "raw": "# Grouping the numerical data\nnum =  dataset.select_dtypes(exclude=\"object\")\nnum = num.drop(['Price'], axis=1)",
+      "total-ns": 3973903
+    },
+    {
+      "raw": "# coverting date into datetime format\ndataset['Date'] = pd.to_datetime(dataset['Date'])\nyear = dataset['Date'].map(lambda x: datetime.strftime(x, '%Y'))\ndataset['year'] = year\nmonth = dataset['Date'].map(lambda x: datetime.strftime(x, '%b'))\ndataset['month'] = month",
+      "total-ns": 92179505
+    },
+    {
+      "raw": "# Dataset of Metropolitan area\nrm = dataset[dataset['Regionname'].map(lambda x: 'Metropolitan' in x)]\n\n# Dataset of Victoria area\nrv = dataset[dataset['Regionname'].map(lambda x: 'Victoria' in x)]",
+      "total-ns": 10494393
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "cells": [
+    {
+      "raw": "import numpy as np\nimport os\nimport pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt",
+      "total-ns": 2320905534
+    },
+    {
+      "raw": "passmark = 40",
+      "total-ns": 328790
+    },
+    {
+      "raw": "df = pd.read_csv(\"../input/StudentsPerformance.csv\")",
+      "total-ns": 6065167
+    },
+    {
+      "raw": "factor = 1000\ndf = pd.concat([df]*factor)\ndf.info()",
+      "total-ns": 653070217
+    },
+    {
+      "raw": "df.head()",
+      "total-ns": 664881
+    },
+    {
+      "raw": "print (df.shape)",
+      "total-ns": 254257
+    },
+    {
+      "raw": "df.describe()",
+      "total-ns": 94144617
+    },
+    {
+      "raw": "df.isnull().sum()",
+      "total-ns": 655783080
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x=\"math score\", data = df, palette=\"muted\")\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 281841
+    },
+    {
+      "raw": "df['Math_PassStatus'] = np.where(df['math score']<passmark, 'F', 'P')\ndf.Math_PassStatus.value_counts()",
+      "total-ns": 46093505
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x='parental level of education', data = df, hue='Math_PassStatus', palette='bright')\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 179337
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.countplot(x=\"reading score\", data = df, palette=\"muted\")\n# plt.show()",
+      "total-ns": 96658
+    },
+    {
+      "raw": "df['Reading_PassStatus'] = np.where(df['reading score']<passmark, 'F', 'P')\ndf.Reading_PassStatus.value_counts()",
+      "total-ns": 50003624
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x='parental level of education', data = df, hue='Reading_PassStatus', palette='bright')\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 268149
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x=\"writing score\", data = df, palette=\"muted\")\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 174444
+    },
+    {
+      "raw": "df['Writing_PassStatus'] = np.where(df['writing score']<passmark, 'F', 'P')\ndf.Writing_PassStatus.value_counts()",
+      "total-ns": 59147474
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x='parental level of education', data = df, hue='Writing_PassStatus', palette='bright')\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 228210
+    },
+    {
+      "raw": "df['OverAll_PassStatus'] = df.apply(lambda x : 'F' if x['Math_PassStatus'] == 'F' or \n                                    x['Reading_PassStatus'] == 'F' or x['Writing_PassStatus'] == 'F' else 'P', axis =1)\n\ndf.OverAll_PassStatus.value_counts()",
+      "total-ns": 9977313099
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x='parental level of education', data = df, hue='OverAll_PassStatus', palette='bright')\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 174810
+    },
+    {
+      "raw": "df['Total_Marks'] = df['math score']+df['reading score']+df['writing score']\ndf['Percentage'] = df['Total_Marks']/3",
+      "total-ns": 14216882
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x=\"Percentage\", data = df, palette=\"muted\")\n# _ = plt.setp(p.get_xticklabels(), rotation=0) ",
+      "total-ns": 166381
+    },
+    {
+      "raw": "def GetGrade(Percentage, OverAll_PassStatus):\n    if ( OverAll_PassStatus == 'F'):\n        return 'F'    \n    if ( Percentage >= 80 ):\n        return 'A'\n    if ( Percentage >= 70):\n        return 'B'\n    if ( Percentage >= 60):\n        return 'C'\n    if ( Percentage >= 50):\n        return 'D'\n    if ( Percentage >= 40):\n        return 'E'\n    else: \n        return 'F'\n\ndf['Grade'] = df.apply(lambda x : GetGrade(x['Percentage'], x['OverAll_PassStatus']), axis=1)\n\ndf.Grade.value_counts()",
+      "total-ns": 8542122318
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.countplot(x=\"Grade\", data = df, order=['A','B','C','D','E','F'],  palette=\"muted\")\n# plt.show()",
+      "total-ns": 237368
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# p = sns.countplot(x='parental level of education', data = df, hue='Grade', palette='bright')\n# _ = plt.setp(p.get_xticklabels(), rotation=90) ",
+      "total-ns": 139901
+    }
+  ]
+}

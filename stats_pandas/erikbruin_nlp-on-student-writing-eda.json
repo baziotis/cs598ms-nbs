@@ -1,0 +1,136 @@
+{
+  "cells": [
+    {
+      "raw": "import numpy as np\nimport os\nimport pandas as pd\nfrom glob import glob\nimport matplotlib.pyplot as plt\n# STEFANOS: Disable, can't be parsed. Doesn't change the behavior especially since we've disabled plotting.\n# %matplotlib inline\nimport matplotlib.style as style\nstyle.use('fivethirtyeight')\nfrom matplotlib.ticker import FuncFormatter\nfrom nltk.corpus import stopwords\nfrom tqdm.notebook import tqdm\nimport warnings\nwarnings.filterwarnings('ignore')\n# STEFANOS: Remove unneeded imports.\n# import spacy\nfrom sklearn.feature_extraction.text import CountVectorizer\nimport os",
+      "total-ns": 5197586665
+    },
+    {
+      "raw": "train = pd.read_csv('../input/feedback-prize-2021/train.csv')\nif \"IREWR_LESS_REPLICATION\" in os.environ and os.environ[\"IREWR_LESS_REPLICATION\"] == \"True\":\n    train = train[:5000]\n\ntrain[['discourse_id', 'discourse_start', 'discourse_end']] = train[['discourse_id', 'discourse_start', 'discourse_end']].astype(int)\n\nsample_submission = pd.read_csv('../input/feedback-prize-2021/sample_submission.csv')\n\n#The glob module finds all the pathnames matching a specified pattern according to the rules used by the Unix shell\ntrain_txt = glob('../input/feedback-prize-2021/train/*.txt')\ntest_txt = glob('../input/feedback-prize-2021/test/*.txt')",
+      "total-ns": 946425602
+    },
+    {
+      "raw": "# Disable shell code.\n# !cat ../input/feedback-prize-2021/train/423A1CA112E2.txt",
+      "total-ns": 219322
+    },
+    {
+      "raw": "train.query('id == \"423A1CA112E2\"')",
+      "total-ns": 7333505
+    },
+    {
+      "raw": "#add columns\ntrain[\"discourse_len\"] = train[\"discourse_text\"].apply(lambda x: len(x.split()))\ntrain[\"pred_len\"] = train[\"predictionstring\"].apply(lambda x: len(x.split()))\n\n\ncols_to_display = ['discourse_id', 'discourse_text', 'discourse_type','predictionstring', 'discourse_len', 'pred_len']\ntrain[cols_to_display].head()",
+      "total-ns": 572721654
+    },
+    {
+      "raw": "print(f\"The total number of discourses is {len(train)}\")\ntrain.query('discourse_len != pred_len')[cols_to_display]",
+      "total-ns": 6136796
+    },
+    {
+      "raw": "print(train.query('discourse_id == 1622473475289')['discourse_text'].values[0])\nprint(train.query('discourse_id == 1622473475289')['discourse_text'].values[0].split())\nprint(len(train.query('discourse_id == 1622473475289')['discourse_text'].values[0].split()))",
+      "total-ns": 8536937
+    },
+    {
+      "raw": "print(train.query('discourse_id == 1622473475289')['predictionstring'].values[0])\nprint(train.query('discourse_id == 1622473475289')['predictionstring'].values[0].split())\nprint(len(train.query('discourse_id == 1622473475289')['predictionstring'].values[0].split()))",
+      "total-ns": 7840493
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# fig = plt.figure(figsize=(12,8))\n\n# ax1 = fig.add_subplot(211)\n# ax1 = train.groupby('discourse_type')['discourse_len'].mean().sort_values().plot(kind=\"barh\")\nax1 = train.groupby('discourse_type')['discourse_len'].mean().sort_values()\n# ax1.set_title(\"Average number of words versus Discourse Type\", fontsize=14, fontweight = 'bold')\n# ax1.set_xlabel(\"Average number of words\", fontsize = 10)\n# ax1.set_ylabel(\"\")\n\n# ax2 = fig.add_subplot(212)\n# ax2 = train.groupby('discourse_type')['discourse_type'].count().sort_values().plot(kind=\"barh\")\nax2 = train.groupby('discourse_type')['discourse_type'].count().sort_values()\n# ax2.get_xaxis().set_major_formatter(FuncFormatter(lambda x, p: format(int(x), ','))) #add thousands separator\n# ax2.set_title(\"Frequency of Discourse Type in all essays\", fontsize=14, fontweight = 'bold')\n# ax2.set_xlabel(\"Frequency\", fontsize = 10)\n# ax2.set_ylabel(\"\")\n\n# plt.tight_layout(pad=2)\n# plt.show()",
+      "total-ns": 18496423
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# fig = plt.figure(figsize=(12,8))\n\n# STEFANOS-DISABLE-FOR-MODIN:\n#### ORIGINAL ####\n# av_per_essay = train['discourse_type_num'].value_counts(ascending = True).rename_axis('discourse_type_num').reset_index(name='count')\n#### CAN RUN WITH MODIN ####\nav_per_essay = train['discourse_type_num'].value_counts(ascending = True)\nav_per_essay.index.name = \"discourse_type_num\"\nav_per_essay = av_per_essay.reset_index(name='count')\n\nav_per_essay['perc'] = round((av_per_essay['count'] / train.id.nunique()),3)\nav_per_essay = av_per_essay.set_index('discourse_type_num')\n# ax = av_per_essay.query('perc > 0.03')['perc'].plot(kind=\"barh\")\nax = av_per_essay.query('perc > 0.03')['perc']\n# ax.set_title(\"discourse_type_num: Percent present in essays\", fontsize=20, fontweight = 'bold')\n# ax.bar_label(ax.containers[0], label_type=\"edge\")\n# ax.set_xlabel(\"Percent\")\n# ax.set_ylabel(\"\")\n# plt.show()",
+      "total-ns": 19421003
+    },
+    {
+      "raw": "data = train.groupby(\"discourse_type\")[['discourse_end', 'discourse_start']].mean().reset_index().sort_values(by = 'discourse_start', ascending = False)\n# data.plot(x='discourse_type',\n#         kind='barh',\n#         stacked=False,\n#         title='Average start and end position absolute',\n#         figsize=(12,4))\n# plt.show()",
+      "total-ns": 12943223
+    },
+    {
+      "raw": "# STEFANOS-DISABLE-FOR-MODIN:\n#### ORIGINAL ####\n#train_first = train.drop_duplicates(subset = \"id\", keep = \"first\").discourse_type.value_counts().rename_axis('discourse_type').reset_index(name='counts_first')\n#### CAN RUN WITH MODIN ####\ntrain_first = train.drop_duplicates(subset = \"id\", keep = \"first\").discourse_type.value_counts()\ntrain_first.index.name = 'discourse_type'\ntrain_first = train_first.reset_index(name='counts_first')\n\ntrain_first['percent_first'] = round((train_first['counts_first']/train.id.nunique()),2)\n# STEFANOS-DISABLE-FOR-MODIN:\n#### ORIGINAL ####\n# train_last = train.drop_duplicates(subset = \"id\", keep = \"last\").discourse_type.value_counts().rename_axis('discourse_type').reset_index(name='counts_last')\n#### CAN RUN WITH MODIN ####\ntrain_last = train.drop_duplicates(subset = \"id\", keep = \"last\").discourse_type.value_counts()\ntrain_last.index.name = 'discourse_type'\ntrain_last = train_last.reset_index(name='counts_last')\n\n\ntrain_last['percent_last'] = round((train_last['counts_last']/train.id.nunique()),2)\ntrain_first_last = train_first.merge(train_last, on = \"discourse_type\", how = \"left\")\ntrain_first_last",
+      "total-ns": 46700645
+    },
+    {
+      "raw": "train['discourse_nr'] = 1\ncounter = 1\n\nfor i in tqdm(range(1, len(train))):\n    if train.loc[i, 'id'] == train.loc[i-1, 'id']:\n        counter += 1\n        train.loc[i, 'discourse_nr'] = counter\n    else:\n        counter = 1\n        train.loc[i, 'discourse_nr'] = counter\n\n#if you are interested in other discourse_types you can add them to the list in df.query\n# STEFANOS-DISABLE-FOR-MODIN:\n# It seems you cannot call things on top of a groupby.\n### ORIGINAL\n# train.query('discourse_type in [\"Lead\"]').groupby('discourse_type_num')['discourse_nr'].value_counts().to_frame('occurences')\n### COMPATIBLE WITH MODIN:\ntrain.query('discourse_type in [\"Lead\"]').groupby('discourse_type_num')['discourse_nr']",
+      "total-ns": 15702622002
+    },
+    {
+      "raw": "# this code chunk is copied from Rob Mulla\nlen_dict = {}\nword_dict = {}\nfor t in tqdm(train_txt):\n    with open(t, \"r\") as txt_file:\n        myid = t.split(\"/\")[-1].replace(\".txt\", \"\")\n        data = txt_file.read()\n        mylen = len(data.strip())\n        myword = len(data.split())\n        len_dict[myid] = mylen\n        word_dict[myid] = myword\ntrain[\"essay_len\"] = train[\"id\"].map(len_dict)\ntrain[\"essay_words\"] = train[\"id\"].map(word_dict)",
+      "total-ns": 4876703660
+    },
+    {
+      "raw": "#initialize column\ntrain['gap_length'] = np.nan\n\n#set the first one\ntrain.loc[0, 'gap_length'] = 7 #discourse start - 1 (previous end is always -1)\n\n#loop over rest\nfor i in tqdm(range(1, len(train))):\n    #gap if difference is not 1 within an essay\n    if ((train.loc[i, \"id\"] == train.loc[i-1, \"id\"])\\\n        and (train.loc[i, \"discourse_start\"] - train.loc[i-1, \"discourse_end\"] > 1)):\n        train.loc[i, 'gap_length'] = train.loc[i, \"discourse_start\"] - train.loc[i-1, \"discourse_end\"] - 2\n        #minus 2 as the previous end is always -1 and the previous start always +1\n    #gap if the first discourse of an new essay does not start at 0\n    elif ((train.loc[i, \"id\"] != train.loc[i-1, \"id\"])\\\n        and (train.loc[i, \"discourse_start\"] != 0)):\n        train.loc[i, 'gap_length'] = train.loc[i, \"discourse_start\"] -1\n\n\n #is there any text after the last discourse of an essay?\nlast_ones = train.drop_duplicates(subset=\"id\", keep='last')\nlast_ones['gap_end_length'] = np.where((last_ones.discourse_end < last_ones.essay_len),\\\n                                       (last_ones.essay_len - last_ones.discourse_end),\\\n                                       np.nan)\n\ncols_to_merge = ['id', 'discourse_id', 'gap_end_length']\ntrain = train.merge(last_ones[cols_to_merge], on = [\"id\", \"discourse_id\"], how = \"left\")",
+      "total-ns": 9423079503
+    },
+    {
+      "raw": "#display an example\ncols_to_display = ['id', 'discourse_start', 'discourse_end', 'discourse_type', 'essay_len', 'gap_length', 'gap_end_length']\ntrain[cols_to_display].query('id == \"AFEC37C2D43F\"')",
+      "total-ns": 27231195
+    },
+    {
+      "raw": "#how many pieces of tekst are not used as discourses?\nprint(f\"Besides the {len(train)} discourse texts, there are {len(train.query('gap_length.notna()', engine='python'))+ len(train.query('gap_end_length.notna()', engine='python'))} pieces of text not classified.\")",
+      "total-ns": 8506906
+    },
+    {
+      "raw": "# STEFANOS: We have to change code slightly because we use less data. The original code plugs constant values\n# which depend on some data existing.\nif \"IREWR_LESS_REPLICATION\" in os.environ and os.environ[\"IREWR_LESS_REPLICATION\"] == \"True\":\n    _IREWR_tmp = train.sort_values(by = \"gap_length\", ascending = False)[cols_to_display].head()\n    _IREWR_plug_2 = _IREWR_tmp.iloc[0][\"id\"]\n    _IREWR_tmp\nelse:\n    # Original\n    train.sort_values(by = \"gap_length\", ascending = False)[cols_to_display].head()",
+      "total-ns": 29323250
+    },
+    {
+      "raw": "# STEFANOS: We have to change code slightly because we use less data. The original code plugs constant values\n# which depend on some data existing.\nif \"IREWR_LESS_REPLICATION\" in os.environ and os.environ[\"IREWR_LESS_REPLICATION\"] == \"True\":\n    _IREWR_tmp2 = train.sort_values(by = \"gap_end_length\", ascending = False)[cols_to_display].head()\n    _IREWR_plug_1 = _IREWR_tmp2.iloc[1][\"id\"]\n    _IREWR_tmp2\nelse:\n    train.sort_values(by = \"gap_length\", ascending = False)[cols_to_display].head()",
+      "total-ns": 20942893
+    },
+    {
+      "raw": "all_gaps = (train.gap_length[~train.gap_length.isna()]).append((train.gap_end_length[~train.gap_end_length.isna()]), ignore_index= True)\n#filter outliers\nall_gaps = all_gaps[all_gaps<300]\n# fig = plt.figure(figsize=(12,6))\n# all_gaps.plot.hist(bins=100)\n# plt.title(\"Histogram of gap length (gaps up to 300 characters only)\")\n# plt.xticks(rotation=0)\n# plt.xlabel(\"Length of gaps in characters\")\n# plt.show()",
+      "total-ns": 3693042
+    },
+    {
+      "raw": "total_gaps = train.groupby('id').agg({'essay_len': 'first',\\\n                                               'gap_length': 'sum',\\\n                                               'gap_end_length': 'sum'})\ntotal_gaps['perc_not_classified'] = round(((total_gaps.gap_length + total_gaps.gap_end_length)/total_gaps.essay_len),2)\n\ntotal_gaps.sort_values(by = 'perc_not_classified', ascending = False).head()",
+      "total-ns": 25036397
+    },
+    {
+      "raw": "def add_gap_rows(essay):\n    cols_to_keep = ['discourse_start', 'discourse_end', 'discourse_type', 'gap_length', 'gap_end_length']\n    df_essay = train.query('id == @essay')[cols_to_keep].reset_index(drop = True)\n    \n    print(df_essay)\n\n    #index new row\n    insert_row = len(df_essay)\n   \n    for i in range(1, len(df_essay)):          \n        if df_essay.loc[i,\"gap_length\"] >0:\n            if i == 0:\n                start = 0 #as there is no i-1 for first row\n                end = df_essay.loc[0, 'discourse_start'] -1\n                disc_type = \"Nothing\"\n                gap_end = np.nan\n                gap = np.nan\n                df_essay.loc[insert_row] = [start, end, disc_type, gap, gap_end]\n                insert_row += 1\n            else:\n                start = df_essay.loc[i-1, \"discourse_end\"] + 1\n                end = df_essay.loc[i, 'discourse_start'] -1\n                disc_type = \"Nothing\"\n                gap_end = np.nan\n                gap = np.nan\n                df_essay.loc[insert_row] = [start, end, disc_type, gap, gap_end]\n                insert_row += 1\n\n    df_essay = df_essay.sort_values(by = \"discourse_start\").reset_index(drop=True)\n\n    #add gap at end\n    if df_essay.loc[(len(df_essay)-1),'gap_end_length'] > 0:\n        start = df_essay.loc[(len(df_essay)-1), \"discourse_end\"] + 1\n        end = start + df_essay.loc[(len(df_essay)-1), 'gap_end_length']\n        disc_type = \"Nothing\"\n        gap_end = np.nan\n        gap = np.nan\n        df_essay.loc[insert_row] = [start, end, disc_type, gap, gap_end]\n        \n    return(df_essay)",
+      "total-ns": 2140905
+    },
+    {
+      "raw": "# STEFANOS: See above.\nif \"IREWR_LESS_REPLICATION\" in os.environ and os.environ[\"IREWR_LESS_REPLICATION\"] == \"True\":\n    add_gap_rows(_IREWR_plug_1)\nelse:\n    add_gap_rows(\"129497C3E0FC\")",
+      "total-ns": 16774216
+    },
+    {
+      "raw": "def print_colored_essay(essay):\n    df_essay = add_gap_rows(essay)\n    #code from https://www.kaggle.com/odins0n/feedback-prize-eda, but adjusted to df_essay\n    essay_file = \"../input/feedback-prize-2021/train/\" + essay + \".txt\"\n\n    ents = []\n    for i, row in df_essay.iterrows():\n        ents.append({\n                        'start': int(row['discourse_start']), \n                         'end': int(row['discourse_end']), \n                         'label': row['discourse_type']\n                    })\n\n    with open(essay_file, 'r') as file: data = file.read()\n\n    doc2 = {\n        \"text\": data,\n        \"ents\": ents,\n    }\n\n    colors = {'Lead': '#EE11D0','Position': '#AB4DE1','Claim': '#1EDE71','Evidence': '#33FAFA','Counterclaim': '#4253C1','Concluding Statement': 'yellow','Rebuttal': 'red'}\n    options = {\"ents\": df_essay.discourse_type.unique().tolist(), \"colors\": colors}\n    # STEFANOS: Disable plotting-like code.\n#     spacy.displacy.render(doc2, style=\"ent\", options=options, manual=True, jupyter=True);",
+      "total-ns": 1192145
+    },
+    {
+      "raw": "# STEFANOS: See above.\n# print_colored_essay(\"7330313ED3F0\")\nif \"IREWR_LESS_REPLICATION\" in os.environ and os.environ[\"IREWR_LESS_REPLICATION\"] == \"True\":\n    print_colored_essay(_IREWR_plug_2)\nelse:\n    print_colored_essay(\"7330313ED3F0\")",
+      "total-ns": 12171938
+    },
+    {
+      "raw": "train['discourse_text'] = train['discourse_text'].str.lower()\n\n#get stopwords from nltk library\nstop_english = stopwords.words(\"english\")\nother_words_to_take_out = ['school', 'students', 'people', 'would', 'could', 'many']\nstop_english.extend(other_words_to_take_out)\n\n#put dataframe of Top-10 words in dict for all discourse types\ncounts_dict = {}\nfor dt in train['discourse_type'].unique():\n    df = train.query('discourse_type == @dt')\n    text = df.discourse_text.apply(lambda x: x.split()).tolist()\n    text = [item for elem in text for item in elem]\n    df1 = pd.Series(text).value_counts().to_frame().reset_index()\n    df1.columns = ['Word', 'Frequency']\n    df1 = df1[~df1.Word.isin(stop_english)].head(10)\n    df1 = df1.set_index(\"Word\").sort_values(by = \"Frequency\", ascending = True)\n    counts_dict[dt] = df1\n\n# STEFANOS: Disable plotting\n# plt.figure(figsize=(15, 12))\n# plt.subplots_adjust(hspace=0.5)\n\nkeys = list(counts_dict.keys())\n\n# STEFANOS: Disable plotting\n# for n, key in enumerate(keys):\n#     ax = plt.subplot(4, 2, n + 1)\n#     ax.set_title(f\"Most used words in {key}\")\n#     counts_dict[keys[n]].plot(ax=ax, kind = 'barh')\n#     plt.ylabel(\"\")\n\n# plt.show()",
+      "total-ns": 2198201362
+    },
+    {
+      "raw": "def get_n_grams(n_grams, top_n = 10):\n    df_words = pd.DataFrame()\n    for dt in tqdm(train['discourse_type'].unique()):\n        df = train.query('discourse_type == @dt')\n        texts = df['discourse_text'].tolist()\n        vec = CountVectorizer(lowercase = True, stop_words = 'english',\\\n                              ngram_range=(n_grams, n_grams)).fit(texts)\n        bag_of_words = vec.transform(texts)\n        sum_words = bag_of_words.sum(axis=0)\n        words_freq = [(word, sum_words[0, idx]) for word, idx in vec.vocabulary_.items()]\n        cvec_df = pd.DataFrame.from_records(words_freq,\\\n                                            columns= ['words', 'counts']).sort_values(by=\"counts\", ascending=False)\n        cvec_df.insert(0, \"Discourse_type\", dt)\n        cvec_df = cvec_df.iloc[:top_n,:]\n        df_words = df_words.append(cvec_df)\n    return df_words",
+      "total-ns": 1335336
+    },
+    {
+      "raw": "bigrams = get_n_grams(n_grams = 2, top_n=10)\nbigrams.head()",
+      "total-ns": 14916429994
+    },
+    {
+      "raw": "def plot_ngram(df, type = \"bigrams\"):\n# STEFANOS: Disable plotting\n#     plt.figure(figsize=(15, 12))\n#     plt.subplots_adjust(hspace=0.5)\n\n#     for n, dt in enumerate(df.Discourse_type.unique()):\n#         ax = plt.subplot(4, 2, n + 1)\n#         ax.set_title(f\"Most used {type} in {dt}\")\n        data = df.query('Discourse_type == @dt')[['words', 'counts']].set_index(\"words\").sort_values(by = \"counts\", ascending = True)\n#         data.plot(ax=ax, kind = 'barh')\n#         plt.ylabel(\"\")\n#     plt.tight_layout()\n#     plt.show()\n    \nplot_ngram(bigrams)",
+      "total-ns": 3116773
+    },
+    {
+      "raw": "trigrams = get_n_grams(n_grams = 3, top_n=10)\nplot_ngram(trigrams, type = \"trigrams\")",
+      "total-ns": 18695062338
+    },
+    {
+      "raw": "# https://www.kaggle.com/raghavendrakotala/fine-tunned-on-roberta-base-as-ner-problem-0-533\ntest_names, train_texts = [], []\nfor f in tqdm(list(os.listdir('../input/feedback-prize-2021/train'))):\n    test_names.append(f.replace('.txt', ''))\n    train_texts.append(open('../input/feedback-prize-2021/train/' + f, 'r').read())\ntrain_text_df = pd.DataFrame({'id': test_names, 'text': train_texts})\ntrain_text_df.head()",
+      "total-ns": 689395269
+    },
+    {
+      "raw": "all_entities = []\n#loop over dataframe with all full texts\nfor i in tqdm(range(len(train_text_df))):\n    total = len(train_text_df.loc[i, 'text'].split())\n    #now a list with length the total number of words in an essay is initialised with all values being \"O\"\n    entities = [\"O\"]*total\n    #now loop over dataframe with all discourses of this particular essay\n    discourse_id = train_text_df.loc[i, 'id']\n    train_df_id = train.query('id == @discourse_id').reset_index(drop=True)\n    for j in range(len(train_df_id)):\n        discourse = train_df_id.loc[j, 'discourse_type']\n        #make a list with the position numbers in predictionstring converted into integer\n        list_ix = [int(x) for x in train_df_id.loc[j, 'predictionstring'].split(' ')]\n        #now the entities lists gets overwritten where there are discourse identified by the experts\n        #the first word of each discourse gets prefix \"Beginning\"\n        entities[list_ix[0]] = f\"B-{discourse}\"\n        #the other ones get prefix I\n        for k in list_ix[1:]: entities[k] = f\"I-{discourse}\"\n    all_entities.append(entities)\n    \n    \ntrain_text_df['entities'] = all_entities",
+      "total-ns": 67748567232
+    },
+    {
+      "raw": "train_text_df.head()",
+      "total-ns": 413952
+    }
+  ]
+}

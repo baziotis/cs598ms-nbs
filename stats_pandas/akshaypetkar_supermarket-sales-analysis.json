@@ -1,0 +1,68 @@
+{
+  "cells": [
+    {
+      "raw": "import pandas as pd \nimport numpy as np",
+      "total-ns": 1181108036
+    },
+    {
+      "raw": "df = pd.read_csv('../input/annex1.csv')\ndf.head()",
+      "total-ns": 4868982
+    },
+    {
+      "raw": "df1 = pd.read_csv('../input/annex2.csv')\ndf1.head()",
+      "total-ns": 860751398
+    },
+    {
+      "raw": "# Join the both DataFrames\n\nmerge = pd.merge(df, df1, on ='Item Code')\nmerge.head()",
+      "total-ns": 272320896
+    },
+    {
+      "raw": "# Rename Columns\nmerge = merge.rename(columns={'Quantity Sold (kilo)':'Quantity Sold', 'Unit Selling Price (RMB/kg)':'Unit Selling Price','Discount (Yes/No)':'Discount'})",
+      "total-ns": 189208878
+    },
+    {
+      "raw": "#Change datatype of date column.\n\nmerge['Date'] = pd.to_datetime(merge['Date'])",
+      "total-ns": 128845808
+    },
+    {
+      "raw": "merge.isnull().sum()",
+      "total-ns": 490069848
+    },
+    {
+      "raw": "Category_count = merge['Category Name'].value_counts()\nCategory_count",
+      "total-ns": 30285779
+    },
+    {
+      "raw": "top_10_products = merge['Item Name'].value_counts()[:10]\ntop_10_products",
+      "total-ns": 26761905
+    },
+    {
+      "raw": "# Creating sales column\n\nmerge['Sales'] = merge['Unit Selling Price'] * merge['Quantity Sold']",
+      "total-ns": 3417754
+    },
+    {
+      "raw": "Item_sales = merge.groupby('Item Name',as_index=False)['Sales'].sum().sort_values(by='Sales',ascending=False).head(10)\nItem_sales",
+      "total-ns": 60842593
+    },
+    {
+      "raw": "#Add year column in dataframe\nmerge['Year'] = merge['Date'].dt.year",
+      "total-ns": 26815518
+    },
+    {
+      "raw": "Year_wise_sales=merge.groupby('Year')['Sales'].sum()\nYear_wise_sales",
+      "total-ns": 19444878
+    },
+    {
+      "raw": "Sale_Or_Return = merge['Sale or Return'].value_counts()\nSale_Or_Return = pd.DataFrame(Sale_Or_Return)\nSale_Or_Return",
+      "total-ns": 37435809
+    },
+    {
+      "raw": "Discount = merge['Discount'].value_counts()\nDiscount = pd.DataFrame(Discount)\nDiscount",
+      "total-ns": 38038290
+    },
+    {
+      "raw": "",
+      "total-ns": 117130
+    }
+  ]
+}

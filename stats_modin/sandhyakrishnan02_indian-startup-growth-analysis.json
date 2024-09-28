@@ -1,0 +1,44 @@
+{
+  "cells": [
+    {
+      "raw": "import numpy as np \nimport os\n\nimport os\nos.environ[\"MODIN_ENGINE\"] = \"ray\"\nimport ray\nos.environ['MODIN_CPUS'] = \"4\"\nray.init(num_cpus=4, runtime_env={'env_vars': {'__MODIN_AUTOIMPORT_PANDAS__': '1'}})\nimport modin.pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport plotly.express as px\n\n# from wordcloud import WordCloud\nimport string",
+      "total-ns": 6399597467
+    },
+    {
+      "raw": "df = pd.read_csv('../input/indian-startup-recognized-by-dpiit/Startup_Counts_Across_India.csv')\ndf.head().style.background_gradient(cmap='coolwarm')",
+      "total-ns": 5670212047
+    },
+    {
+      "raw": "factor = 2500\ndf = pd.concat([df]*factor, ignore_index=True)\ndf.info()",
+      "total-ns": 13906536085
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# fig = px.scatter(df,x=\"Industry\", y=\"Year\", size=\"Count\", color=\"Count\",template='plotly_dark', title=\"Industry Vs Year\")\n# fig.show()",
+      "total-ns": 282739
+    },
+    {
+      "raw": "# fig, ax = plt.subplots(1,1, figsize=(15, 6))\ndf_year = df['Year'].value_counts().sort_index()\n# STEFANOS: Disable plotting\n# ax.bar(df_year.index, df_year, width=0.55,linewidth=0.7, color = 'purple')\n# for i in df_year.index:\n#     ax.annotate(f\"{df_year[i]}\",xy=(i, df_year[i] + 100),\n#                    va = 'center', ha='center')\n# ax.set_ylim(0, 1300)    \n# fig.text(0.1, 0.95, \"Growth of Startup's from 2016-2022\", fontsize=15, fontweight='bold')    \n\n# ax.grid(axis='y', linestyle='-', alpha=0.4)  ",
+      "total-ns": 5952106759
+    },
+    {
+      "raw": "df.groupby('Industry').size().sort_values(ascending=False).to_frame().style.background_gradient(cmap='coolwarm')",
+      "total-ns": 7097342082
+    },
+    {
+      "raw": "# fig, ax = plt.subplots(1,1, figsize=(20, 6))\ndf_ind = df['Industry'].value_counts().iloc[:20]\n\n# STEFANOS: Disable plotting\n# ax.bar(df_ind.index, df_ind, width=0.55,linewidth=0.7, color = 'pink')\n# for i in df_ind.index:\n#     ax.annotate(f\"{df_ind[i]}\",xy=(i, df_ind[i] + 20),va = 'center', ha='center')\n# ax.set_ylim(0, 220)    \n# fig.text(0.1, 0.95, \"Top 20 Startup Industries from 2016\", fontsize=15, fontweight='bold')    \n# plt.xticks(rotation=90)\n# ax.grid(axis='y', linestyle='-', alpha=0.4)  ",
+      "total-ns": 2425740355
+    },
+    {
+      "raw": "# fig, ax = plt.subplots(1,1, figsize=(20, 6))\nX = df['State'].value_counts().iloc[:20]\n\n# STEFANOS: Disable plotting\n# ax.bar(X.index, X, width=0.55,linewidth=0.7, color = 'lightblue')\n# for i in X.index:\n#     ax.annotate(f\"{X[i]}\",xy=(i, X[i] + 50),\n#                    va = 'center', ha='center')\n# ax.set_ylim(0, 400)    \n# fig.text(0.1, 0.95, \"Top 20 States Having maximum Start'ups from 2016\", fontsize=15, fontweight='bold')    \n# plt.xticks(rotation=90)\n# ax.grid(axis='y', linestyle='-', alpha=0.4)  ",
+      "total-ns": 2403039660
+    },
+    {
+      "raw": "ds_list=['Internet of Things','AI','Robotics','Analytics','Computer Vision']\nds_df = df[df['Industry'].isin(ds_list)]",
+      "total-ns": 29166008
+    },
+    {
+      "raw": "# STEFANOS: Disable plotting\n# sns.set_style('whitegrid')\n# sns.catplot(x='Year', hue = 'Industry', kind='count', data=ds_df,palette=\"Set3\", height=8.27, aspect=11.7/8.27);\n# plt.show()",
+      "total-ns": 262376
+    }
+  ]
+}

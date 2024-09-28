@@ -1,0 +1,24 @@
+{
+  "cells": [
+    {
+      "raw": "\nimport os\nos.environ[\"MODIN_ENGINE\"] = \"ray\"\nimport ray\nos.environ['MODIN_CPUS'] = \"4\"\nray.init(num_cpus=4, runtime_env={'env_vars': {'__MODIN_AUTOIMPORT_PANDAS__': '1'}})\nimport modin.pandas as pd\ndf = pd.read_csv(filepath_or_buffer='../input/Airline Dataset.csv', parse_dates=['Departure Date'])\ndf.head()",
+      "total-ns": 31878671736
+    },
+    {
+      "raw": "df.info()",
+      "total-ns": 209528797
+    },
+    {
+      "raw": "df.nunique()",
+      "total-ns": 9837972
+    },
+    {
+      "raw": "df['Departure Date'].dt.year.value_counts()",
+      "total-ns": 233769866
+    },
+    {
+      "raw": "df['Last Name'].value_counts().nlargest(n=10)",
+      "total-ns": 532088618
+    }
+  ]
+}
